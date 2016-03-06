@@ -2,6 +2,8 @@ package org.skimens.wakeonalarm;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,6 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.net.wifi.WifiInfo;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.Button;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.InetAddress;
@@ -22,12 +30,65 @@ import java.nio.ByteBuffer;
 
 public class MainActivity extends AppCompatActivity {
 
+    TableLayout deviceList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        deviceList = (TableLayout) findViewById(R.id.devicelist);
+
+        DBHelper db = new DBHelper(this);
+        SQLiteDatabase sdb = db.getReadableDatabase();
+
+        String query = "SELECT * FROM " + DBHelper.TABLE;
+        Cursor cursor2 = sdb.rawQuery(query, null);
+        while (cursor2.moveToNext()) {
+            int id = cursor2.getInt(cursor2
+                    .getColumnIndex(DBHelper._ID));
+            final String name = cursor2.getString(cursor2
+                    .getColumnIndex(DBHelper.NAME_COLUMN));
+            final String IP = cursor2.getString(cursor2
+                    .getColumnIndex(DBHelper.IP_COLUMN));
+            final String MAC = cursor2.getString(cursor2
+                    .getColumnIndex(DBHelper.MAC_COLUMN));
+            Log.v("CURSOR", "ROW " + id + " HAS NAME " + name + " " + IP + " " + MAC);
+
+            TableRow tableRow = new TableRow(this);
+            tableRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            TextView cell = new TextView(this);
+            cell.setText(name + "\n" + IP + "\n" + MAC);
+            cell.setPadding(10, 0, 15, 5);
+            Button alarmbt = new Button(this);
+            alarmbt.setText("Set Alarm");
+            alarmbt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+                }
+            });
+            Button wakebt = new Button(this);
+            wakebt.setText("Wake");
+            wakebt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new WakeOnLan(IP, MAC).execute();
+                    Toast.makeText(getBaseContext(), "Wake signal send to " + name, Toast.LENGTH_LONG).show();
+                }
+            });
+            tableRow.addView(cell, 0);
+            tableRow.addView(alarmbt, 1);
+            tableRow.addView(wakebt, 1);
+            deviceList.addView(tableRow, deviceList.getChildCount() - 1);
+        }
+        cursor2.close();
+
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -36,6 +97,9 @@ public class MainActivity extends AppCompatActivity {
                 addPC(view);
             }
         });
+
+
+
     }
 
     @Override

@@ -1,46 +1,36 @@
 package org.skimens.wakeonalarm;
 
-import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.text.Layout;
 import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.view.ViewGroup.LayoutParams;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.concurrent.ExecutionException;
 
 public class AddPC extends AppCompatActivity {
 
@@ -49,7 +39,7 @@ public class AddPC extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.addpc_activity);
+        setContentView(R.layout.activity_addpc);
         deviceList = (TableLayout) findViewById(R.id.devicelist);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbaraddpc);
         setSupportActionBar(toolbar);
@@ -65,7 +55,9 @@ public class AddPC extends AppCompatActivity {
         WifiManager wifiMan = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInf = wifiMan.getConnectionInfo();
         String IP = String.valueOf(wifiInf.getIpAddress());
-        new NetworkDiscovery(this,IP).execute();
+        Log.v("WiFiIP",IP);
+        if(!IP.equals(String.valueOf('0'))){
+        new NetworkDiscovery(this,IP).execute(); }
     }
 
     @Override
@@ -94,7 +86,16 @@ public class AddPC extends AppCompatActivity {
 
     }
 
-    public void processNetworkAddress(String name,String IP,View view) throws UnknownHostException, SocketException, IOException{}
+    public void addDevice(String name,String IP,String MAC) {
+        Log.v("addDevice",name + " " + IP + " " + MAC);
+        DBHelper mDatabaseHelper = new DBHelper(this);
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.NAME_COLUMN, name);
+        values.put(DBHelper.IP_COLUMN, IP);
+        values.put(DBHelper.MAC_COLUMN, MAC);
+        db.insert(DBHelper.TABLE, null, values);
+    }
 
 
     public void addManually(View v){
@@ -123,10 +124,19 @@ public class AddPC extends AppCompatActivity {
         layout.addView(iptext);
 
         final EditText ipedit = new EditText(this);
-        ipedit.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_CLASS_TEXT);
+        ipedit.setInputType(InputType.TYPE_CLASS_TEXT);
         ipedit.setGravity(Gravity.CENTER);
         ipedit.setKeyListener(DigitsKeyListener.getInstance("0123456789."));
         layout.addView(ipedit);
+
+        final TextView mactext = new TextView(this);
+        mactext.setText(" MAC address: ");
+        layout.addView(mactext);
+
+        final EditText macedit = new EditText(this);
+        macedit.setInputType(InputType.TYPE_CLASS_TEXT);
+        macedit.setGravity(Gravity.CENTER);
+        layout.addView(macedit);
 
 
         builder.setView(layout);
@@ -135,15 +145,13 @@ public class AddPC extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int id) {
                 // add check later on
                 String name = nameedit.getText().toString().trim();
-                String IP = ipedit.getText().toString();
+                String IP = ipedit.getText().toString().trim();
+                String MAC = macedit.getText().toString().trim();
                 Log.v("Name", name);
                 Log.v("IP", IP);
-                try {
-                    processNetworkAddress(name, IP,view);
-                } catch (Exception e) {
-                    Log.v("Add PC Manually",e.toString());
-                }
-                }
+                Log.v("Name", name);
+                addDevice(name, IP, MAC);
+            }
         });
         builder.setCancelable(true);
 
@@ -162,7 +170,7 @@ public class AddPC extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            Log.v("PRE","Call from preExecute");
+            Log.v("PRE", "Call from preExecute");
 //            deviceList.removeAllViewsInLayout();
 }
 

@@ -2,13 +2,40 @@ package org.skimens.wakeonalarm;
 
 import java.io.*;
 import java.net.*;
+
+import android.os.AsyncTask;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.TableRow;
+import android.widget.TextView;
 
-public class WakeOnLan {
+public class WakeOnLan extends AsyncTask<Void,String,Void> {
 
-    public static final int PORT = 9;
+    public final int PORT = 9;
+    private String IP;
+    private String MAC;
 
-    public static void main(String ipStr,String macStr) {
+    public WakeOnLan(String IP, String MAC){
+        this.IP = IP;
+        this.MAC = MAC;
+    }
+
+
+    @Override
+    protected void onPreExecute() {}
+
+    @Override
+    protected Void doInBackground(Void... args) {
+        Wake(IP,MAC);
+        return null;
+    };
+
+    @Override
+    protected void onProgressUpdate(String... values) {
+        super.onProgressUpdate(values);
+    }
+
+    public void Wake(String ipStr,String macStr) {
 
 //        if (args.length != 2) {
 //            System.out.println("Usage: java WakeOnLan <broadcast-ip> <mac-address>");
@@ -36,12 +63,12 @@ public class WakeOnLan {
             Log.v("WOL","Wake-on-LAN packet sent.");
         }
         catch (Exception e) {
-            Log.e("WOL", "Failed to send Wake-on-LAN packet: + e");
+            Log.e("WOL", "Failed to send Wake-on-LAN packet: " + e.toString());
         }
 
     }
 
-    private static byte[] getMacBytes(String macStr) throws IllegalArgumentException {
+    private byte[] getMacBytes(String macStr) throws IllegalArgumentException {
         byte[] bytes = new byte[6];
         String[] hex = macStr.split("(\\:|\\-)");
         if (hex.length != 6) {
