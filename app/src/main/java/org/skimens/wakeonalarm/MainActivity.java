@@ -44,17 +44,17 @@ public class MainActivity extends AppCompatActivity {
         DBHelper db = new DBHelper(this);
         SQLiteDatabase sdb = db.getReadableDatabase();
 
-        String query = "SELECT * FROM " + DBHelper.TABLE;
+        String query = "SELECT * FROM " + DBHelper.TABLE_DEVICE;
         Cursor cursor2 = sdb.rawQuery(query, null);
         while (cursor2.moveToNext()) {
             int id = cursor2.getInt(cursor2
                     .getColumnIndex(DBHelper._ID));
             final String name = cursor2.getString(cursor2
-                    .getColumnIndex(DBHelper.NAME_COLUMN));
+                    .getColumnIndex(DBHelper.DEVICE_NAME_COLUMN));
             final String IP = cursor2.getString(cursor2
-                    .getColumnIndex(DBHelper.IP_COLUMN));
+                    .getColumnIndex(DBHelper.DEVICE_IP_COLUMN));
             final String MAC = cursor2.getString(cursor2
-                    .getColumnIndex(DBHelper.MAC_COLUMN));
+                    .getColumnIndex(DBHelper.DEVICE_MAC_COLUMN));
             Log.v("CURSOR", "ROW " + id + " HAS NAME " + name + " " + IP + " " + MAC);
 
             TableRow tableRow = new TableRow(this);
@@ -68,8 +68,11 @@ public class MainActivity extends AppCompatActivity {
             alarmbt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-
+                    Intent TimePickerActivity = new Intent(MainActivity.this,TimePickerActivity.class);
+                    TimePickerActivity.putExtra("IP", IP);
+                    TimePickerActivity.putExtra("name", name);
+                    TimePickerActivity.putExtra("MAC", MAC);
+                    startActivity(TimePickerActivity);
                 }
             });
             Button wakebt = new Button(this);

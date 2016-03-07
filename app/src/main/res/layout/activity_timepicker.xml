@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="org.skimens.wakeonalarm.AlarmActivity">
+    tools:context="org.skimens.wakeonalarm.TimePickerActivity">
 
 
 
@@ -23,15 +23,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_alarm" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:onClick="addPC"
-        android:src="@android:drawable/ic_input_add" />
+    <include layout="@layout/content_timepicker" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -91,10 +91,10 @@ public class AddPC extends AppCompatActivity {
         DBHelper mDatabaseHelper = new DBHelper(this);
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(DBHelper.NAME_COLUMN, name);
-        values.put(DBHelper.IP_COLUMN, IP);
-        values.put(DBHelper.MAC_COLUMN, MAC);
-        db.insert(DBHelper.TABLE, null, values);
+        values.put(DBHelper.DEVICE_NAME_COLUMN, name);
+        values.put(DBHelper.DEVICE_IP_COLUMN, IP);
+        values.put(DBHelper.DEVICE_MAC_COLUMN, MAC);
+        db.insert(DBHelper.TABLE_DEVICE, null, values);
     }
 
 
@@ -219,6 +219,7 @@ public class AddPC extends AppCompatActivity {
 //        protected void onPostExecute(String result) {   }
 
         private boolean ping(String IP) throws UnknownHostException, SocketException,IOException,InterruptedException {
+            // ping range of several ips
             String cmd = String.format("/system/bin/ping -q -n -w 1 -c 1 %s",IP);
             try {
                 Process proc = Runtime.getRuntime().exec(cmd);
