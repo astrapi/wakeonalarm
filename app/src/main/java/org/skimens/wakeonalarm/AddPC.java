@@ -9,6 +9,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,39 +26,48 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Toast;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.regex.Pattern;
 
 public class AddPC extends AppCompatActivity {
 
     TableLayout deviceList;
+
+    String localIP = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addpc);
         deviceList = (TableLayout) findViewById(R.id.devicelist);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbaraddpc);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbaraddpc);
         setSupportActionBar(toolbar);
 
+        WifiManager wifiMan = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        int ip = wifiMan.getConnectionInfo().getIpAddress();
+        Log.v("ip",String.valueOf(ip));
+
+        if(ip != 0){
+            localIP = String.valueOf(ip);
+        }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabaddpc);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addManually(view);
+                addDialog("", localIP, "");
             }
         });
 
-        WifiManager wifiMan = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wifiInf = wifiMan.getConnectionInfo();
-        String IP = String.valueOf(wifiInf.getIpAddress());
-        Log.v("WiFiIP",IP);
-        if(!IP.equals(String.valueOf('0'))){
-        new NetworkDiscovery(this,IP).execute(); }
+        Log.v("WiFiIP",localIP);
+        if(ip != 0){
+        new NetworkDiscovery(this,localIP).execute(); }
     }
 
     @Override
@@ -91,35 +101,45 @@ public class AddPC extends AppCompatActivity {
         DBHelper mDatabaseHelper = new DBHelper(this);
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(DBHelper.DEVICE_NAME_COLUMN, name);
-        values.put(DBHelper.DEVICE_IP_COLUMN, IP);
-        values.put(DBHelper.DEVICE_MAC_COLUMN, MAC);
+        values.put(DBHelper.DEVICE_NAME, name);
+        values.put(DBHelper.DEVICE_IP, IP);
+        values.put(DBHelper.DEVICE_MAC, MAC);
         db.insert(DBHelper.TABLE_DEVICE, null, values);
     }
 
+//    public void addManually(String name,String IP,String MAC){
+//        Log.v("addManually",name + " " + IP + " " + MAC);
+//        nameedit.setText(name);
+//        ipedit.setText(IP);
+//        macedit.setText(MAC);
+//        addDialog().show();
+//    }
+//
+//    public void addManually(){
+//        if(!localIP.equals(String.valueOf('0'))){
+//        ipedit.setText(localIP);};
+//        addDialog().show();
+//    }
 
-    public void addManually(View v){
-        final View view = v;
-
-        String title = "Add device manually";
+    public void addDialog(String name,String IP,String MAC){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title);
-
+        builder.setTitle("Add device");
 
         LinearLayout layout = new LinearLayout(getApplicationContext());
         layout.setGravity(Gravity.CENTER_HORIZONTAL);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        final TextView nametext = new TextView(this);
+        TextView nametext = new TextView(this);
         nametext.setText("\n Custom name for device: ");
         layout.addView(nametext);
 
         final EditText nameedit = new EditText(this);
         nameedit.setGravity(Gravity.CENTER);
+        nameedit.setText(name);
         layout.addView(nameedit);
 
-        final TextView iptext = new TextView(this);
+        TextView iptext = new TextView(this);
         iptext.setText(" IP address: ");
         layout.addView(iptext);
 
@@ -127,39 +147,77 @@ public class AddPC extends AppCompatActivity {
         ipedit.setInputType(InputType.TYPE_CLASS_TEXT);
         ipedit.setGravity(Gravity.CENTER);
         ipedit.setKeyListener(DigitsKeyListener.getInstance("0123456789."));
+        ipedit.setText(IP);
         layout.addView(ipedit);
 
-        final TextView mactext = new TextView(this);
+        TextView mactext = new TextView(this);
         mactext.setText(" MAC address: ");
         layout.addView(mactext);
 
         final EditText macedit = new EditText(this);
         macedit.setInputType(InputType.TYPE_CLASS_TEXT);
         macedit.setGravity(Gravity.CENTER);
+        macedit.setText(MAC);
         layout.addView(macedit);
-
 
         builder.setView(layout);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // add check later on
                 String name = nameedit.getText().toString().trim();
                 String IP = ipedit.getText().toString().trim();
                 String MAC = macedit.getText().toString().trim();
-                Log.v("Name", name);
-                Log.v("IP", IP);
-                Log.v("Name", name);
-                addDevice(name, IP, MAC);
+                // Check if IP address was submitted and it's valid
+                if (IP.length() == 0) {
+                    Log.v("IP", " is null");
+                    Toast.makeText(AddPC.this, "Please, submit IP address", Toast.LENGTH_LONG).show();
+                    addDialog(name, IP, MAC);
+                    return;
+                } else {
+                    final Pattern IPPATTERN = Pattern.compile(
+                            "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+                    if (!IPPATTERN.matcher(IP).matches()) {
+                        Log.v("IP", " is null");
+                        Toast.makeText(AddPC.this, "IP address is not valid", Toast.LENGTH_LONG).show();
+                        addDialog(name, IP, MAC);
+                        return;
+                    }
+                }
+                if (MAC.length() == 0) {
+                    Log.v("MAC", " is null");
+                    Toast.makeText(AddPC.this, "Please, submit MAC address", Toast.LENGTH_LONG).show();
+                    addDialog(name, IP, MAC);
+                    return;
+                } else {
+                    final Pattern MACPATTERN = Pattern.compile(
+                            "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$");
+                    if (!MACPATTERN.matcher(IP).matches()) {
+                        Log.v("IP", " is null");
+                        Toast.makeText(AddPC.this, "MAC address is not valid", Toast.LENGTH_LONG).show();
+                        addDialog(name, IP, MAC);
+                        return;}
+                    }
+
+                    Log.v("name", "name is " + name);
+                    if (name.length() == 0) {
+                        Log.v("name", " is null");
+                        Toast.makeText(AddPC.this, "Please, write custom name", Toast.LENGTH_LONG).show();
+                        addDialog(name, IP, MAC);
+                        return;
+                    }
+
+                    Log.v("IP", "end " + IP);
+//                addDevice(name, IP, MAC);
+                }
             }
-        });
-        builder.setCancelable(true);
 
-        builder.show();
+            );
+            builder.setCancelable(true);
+            builder.show();
+        }
 
-    }
 
-    class NetworkDiscovery extends AsyncTask<Void,String,Void> {
+        class NetworkDiscovery extends AsyncTask<Void,String,Void> {
         private Context context;
         public String IP;
 
@@ -218,7 +276,7 @@ public class AddPC extends AppCompatActivity {
 //        @Override
 //        protected void onPostExecute(String result) {   }
 
-        private boolean ping(String IP) throws UnknownHostException, SocketException,IOException,InterruptedException {
+        public boolean ping(String IP) throws UnknownHostException, SocketException,IOException,InterruptedException {
             // ping range of several ips
             String cmd = String.format("/system/bin/ping -q -n -w 1 -c 1 %s",IP);
             try {

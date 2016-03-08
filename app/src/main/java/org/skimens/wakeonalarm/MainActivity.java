@@ -1,31 +1,22 @@
 package org.skimens.wakeonalarm;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.net.wifi.WifiInfo;
 import android.util.Log;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -47,14 +38,14 @@ public class MainActivity extends AppCompatActivity {
         String query = "SELECT * FROM " + DBHelper.TABLE_DEVICE;
         Cursor cursor2 = sdb.rawQuery(query, null);
         while (cursor2.moveToNext()) {
-            int id = cursor2.getInt(cursor2
+            final int id = cursor2.getInt(cursor2
                     .getColumnIndex(DBHelper._ID));
             final String name = cursor2.getString(cursor2
-                    .getColumnIndex(DBHelper.DEVICE_NAME_COLUMN));
+                    .getColumnIndex(DBHelper.DEVICE_NAME));
             final String IP = cursor2.getString(cursor2
-                    .getColumnIndex(DBHelper.DEVICE_IP_COLUMN));
+                    .getColumnIndex(DBHelper.DEVICE_IP));
             final String MAC = cursor2.getString(cursor2
-                    .getColumnIndex(DBHelper.DEVICE_MAC_COLUMN));
+                    .getColumnIndex(DBHelper.DEVICE_MAC));
             Log.v("CURSOR", "ROW " + id + " HAS NAME " + name + " " + IP + " " + MAC);
 
             TableRow tableRow = new TableRow(this);
@@ -71,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent TimePickerActivity = new Intent(MainActivity.this,TimePickerActivity.class);
                     TimePickerActivity.putExtra("IP", IP);
                     TimePickerActivity.putExtra("name", name);
-                    TimePickerActivity.putExtra("MAC", MAC);
+                    TimePickerActivity.putExtra("ID", String.valueOf(id));
                     startActivity(TimePickerActivity);
                 }
             });

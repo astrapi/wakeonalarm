@@ -12,14 +12,14 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
     private static final int DATABASE_VERSION = 1;
 
     public static final String TABLE_DEVICE = "device";
-    public static final String DEVICE_NAME_COLUMN = "name";
-    public static final String DEVICE_IP_COLUMN = "ip";
-    public static final String DEVICE_MAC_COLUMN = "mac";
+    public static final String DEVICE_NAME = "name";
+    public static final String DEVICE_IP = "ip";
+    public static final String DEVICE_MAC = "mac";
 
     private static final String CREATE_DEVICE_TABLE_SCRIPT = "create table "
             + TABLE_DEVICE + " (" + BaseColumns._ID
-            + " integer primary key autoincrement, " + DEVICE_NAME_COLUMN
-            + " text not null, " + DEVICE_IP_COLUMN + " text not null, " + DEVICE_MAC_COLUMN
+            + " integer primary key autoincrement, " + DEVICE_NAME
+            + " text not null, " + DEVICE_IP + " text not null, " + DEVICE_MAC
             + " text not null);";
 
     public static final String TABLE_ALARM = "alarm";
@@ -33,7 +33,7 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
             + TABLE_ALARM + " (" + BaseColumns._ID
             + " integer primary key autoincrement, " + ALARM_DEVICE_ID
             + " integer not null, " + ALARM_TIME + " text not null, " + ALARM_DAYS
-            + " text not null, " + ALARM_REPEAT + " text not null, " + ALARM_ACTIVE + " text not null);";
+            + " text not null, " + ALARM_REPEAT + " integer not null, " + ALARM_ACTIVE + " integer not null);";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

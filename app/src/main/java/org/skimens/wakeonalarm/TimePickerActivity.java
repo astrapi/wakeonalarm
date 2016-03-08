@@ -2,8 +2,10 @@ package org.skimens.wakeonalarm;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -22,6 +24,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
 
+import java.util.Calendar;
+
 public class TimePickerActivity extends AppCompatActivity {
 
     TimePicker timePicker;
@@ -29,6 +33,10 @@ public class TimePickerActivity extends AppCompatActivity {
     LinearLayout weekdays;
 
     ToggleButton[] weekday;
+
+    String DIP;
+    String DNAME;
+    String DID;
 
     ToggleButton monday;
     ToggleButton tuesday;
@@ -66,15 +74,15 @@ public class TimePickerActivity extends AppCompatActivity {
 
         timePicker = (TimePicker) findViewById(R.id.timePicker);
 
-        String IP = getIntent().getExtras().getString("IP");
-        String name = getIntent().getExtras().getString("name");
-        String ID = getIntent().getExtras().getString("ID");
+        DIP = getIntent().getExtras().getString("IP");
+        DNAME = getIntent().getExtras().getString("name");
+        DID = getIntent().getExtras().getString("ID");
 
-        Log.v("GetIntent",name + " ( " + IP + " ) " + ID);
+        Log.v("GetIntent",DNAME + " ( " + DIP + " ) " + DID);
 
-//        TextView deviceInfo = (TextView) findViewById(R.id.deviceInfo);
-//        Log.v("text", deviceInfo.toString());
-//        deviceInfo.setText(name + " ( " + IP + " )\n");
+        TextView deviceInfo = (TextView) findViewById(R.id.deviceInfo);
+        Log.v("text", deviceInfo.toString());
+        deviceInfo.setText(DNAME + " ( " + DIP + " )\n");
 
         weekdays.post(new Runnable()
         {
@@ -83,9 +91,7 @@ public class TimePickerActivity extends AppCompatActivity {
                 Log.v("TEST", "Layout width : " + weekdays.getWidth());
                 int width = weekdays.getWidth() / 7;
                 for(ToggleButton button : weekday){
-                           Log.v("BW",String.valueOf(button.getWidth()));
                            button.setLayoutParams(new LinearLayout.LayoutParams(width, width));
-                           Log.v("BW", String.valueOf(button.getWidth()));
                 }
             }
         });}
@@ -115,7 +121,7 @@ public class TimePickerActivity extends AppCompatActivity {
 
 
 
-    public void SetAlarm(View view)
+    public void ProcessSettings(View view)
     {
         //Prepare data
         int time = timePicker.getCurrentHour() * 60 + timePicker.getCurrentMinute();
@@ -129,23 +135,49 @@ public class TimePickerActivity extends AppCompatActivity {
 
         Log.v("DAYS",days.toString());
 
-        String act;
-        if(active.isChecked()){ act = "1"; } else { act = "0"; };
-        Log.v("ACTIVE",act);
+        int act;
+        if(active.isChecked()){ act = 1; } else { act = 0; };
+        Log.v("ACTIVE",String.valueOf(act));
 
-        String rep;
-        if(repeat.isChecked()){ rep = "1"; } else { rep = "0"; };
-        Log.v("ACTIVE",act);
+        int rep;
+        if(repeat.isChecked()){ rep = 1; } else { rep = 0; };
+        Log.v("ACTIVE",String.valueOf(rep));
 
-        AlarmManager am =( AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(context, AlarmReceiver.class);
-        PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
-        am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 * 60 * 10, pi); // Millisec * Second * Minute
+        DBHelper mDatabaseHelper = new DBHelper(this);
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.ALARM_DEVICE_ID, DID);
+        values.put(DBHelper.ALARM_DAYS, days.toString());
+        values.put(DBHelper.ALARM_TIME, time);
+        values.put(DBHelper.ALARM_ACTIVE, act);
+        values.put(DBHelper.ALARM_REPEAT, rep);
+        db.insert(DBHelper.TABLE_ALARM, null, values);
 
-
-
+        SetAlarm(time);
 
     }
+
+    public void Return(View view){};
+
+    public void SetAlarm(int time){
+
+        int hour = time / 60;
+        int mins = time % 60;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(calendar.HOUR_OF_DAY, hour);
+        calendar.set(calendar.MINUTE, mins);
+        calendar.set(calendar.SECOND, 0);
+        calendar.set(calendar.MILLISECOND, 0);
+        long sdl = calendar.getTimeInMillis();
+
+        Intent intent = new Intent(TimePickerActivity.this, AlarmReceiver.class);
+        intent.putExtra("DID",DID);
+        PendingIntent sender = PendingIntent.getBroadcast(TimePickerActivity.this, Integer.valueOf(DID), intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarm = (AlarmManager)getSystemService(ALARM_SERVICE);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, sdl, AlarmManager.INTERVAL_DAY, sender);
+
+    };
 
 
 };
