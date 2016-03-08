@@ -57,6 +57,7 @@ public class AddPC extends AppCompatActivity {
         if(ip != 0){
             localIP = String.valueOf(ip);
         }
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabaddpc);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -192,7 +193,7 @@ public class AddPC extends AppCompatActivity {
                     final Pattern MACPATTERN = Pattern.compile(
                             "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$");
                     if (!MACPATTERN.matcher(IP).matches()) {
-                        Log.v("IP", " is null");
+                        Log.v("MAC", " is null");
                         Toast.makeText(AddPC.this, "MAC address is not valid", Toast.LENGTH_LONG).show();
                         addDialog(name, IP, MAC);
                         return;}
@@ -207,7 +208,7 @@ public class AddPC extends AppCompatActivity {
                     }
 
                     Log.v("IP", "end " + IP);
-//                addDevice(name, IP, MAC);
+                    addDevice(name, IP, MAC);
                 }
             }
 
@@ -242,13 +243,8 @@ public class AddPC extends AppCompatActivity {
                 String IP = Mask + String.valueOf(i);
                 try {
                     if(ping(IP)){
-                        StringBuilder info = new StringBuilder(InetAddress.getByName(IP).getHostName());
-                        info.append("\n");
-                        info.append(IP);
-                        info.append("\n");
-                        info.append(getMac(IP));
-                        publishProgress(info.toString());
-                    } else {Log.v("Failed IP",IP);}}
+                        publishProgress(IP,InetAddress.getByName(IP).getHostName());
+                    } else {Log.v("Ping failed",IP);}}
                 catch (Exception e) {
                     Log.v("PING",e.toString());
                 }
@@ -262,13 +258,28 @@ public class AddPC extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            Log.v("onProgressAsync",values[0]);
+            final String IP = values[0];
+            final String name = values[1];
+            final String MAC = getMac(IP);
+            Log.v("onProgressAsync",IP + " " + MAC + " " + MAC);
+            StringBuilder info = new StringBuilder(name);
+            info.append("\n");
+            info.append(IP);
+            info.append("\n");
+            info.append(MAC);
             TableRow tableRow = new TableRow(context);
             tableRow.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT));
             TextView cell = new TextView(context);
-            cell.setText(values[0]);
+            final String value = info.toString();
+            cell.setText(value);
             cell.setPadding(10, 0, 15, 5);
+            cell.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    addDialog(name,IP,MAC);
+                }
+            });
             tableRow.addView(cell, 0);
             deviceList.addView(tableRow,deviceList.getChildCount()-1);
         }
