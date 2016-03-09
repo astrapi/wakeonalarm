@@ -1,5 +1,9 @@
 *.iml
 .gradle
+.navigation
+/app/src/test/
+/app/proguard-rules.pro
+/app/app-release.apk
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
