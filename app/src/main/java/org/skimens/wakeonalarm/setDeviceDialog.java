@@ -1,7 +1,9 @@
 package org.skimens.wakeonalarm;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
@@ -24,13 +26,10 @@ public class setDeviceDialog {
     public static EditText ipedit;
     public static EditText macedit;
 
-    private setDeviceDialog(Context c){
+    public setDeviceDialog(Context c,String name,String IP,String MAC){
+        Log.v("Call","init");
         context = c;
         builder = new AlertDialog.Builder(context);
-    }
-
-
-    public AlertDialog.Builder setDeviceDialog(String name,String IP,String MAC){
 
         builder.setTitle("Add device");
 
@@ -71,9 +70,9 @@ public class setDeviceDialog {
         builder.setView(layout);
         builder.setCancelable(true);
 
-        return builder;
-
     }
+
+
 
     public static boolean checkSetDialog(){
         // Check if IP address was submitted and it's valid
@@ -83,7 +82,7 @@ public class setDeviceDialog {
 
         if (IP.length() == 0) {
             Log.v("IP", " is null");
-            Toast.makeText(context, "Please, submit IP address", Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "Please, submit IP address", Toast.LENGTH_LONG).show();
             return false;
         } else {
             final Pattern IPPATTERN = Pattern.compile(
@@ -117,6 +116,85 @@ public class setDeviceDialog {
 
         Log.v("IP", "end " + IP);
         return true;
+
+    }
+
+
+    public AlertDialog.Builder create(final String DID){
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (checkSetDialog()) {
+                    process(DID);
+                } else {
+                    builder.show();
+                }
+                ;
+            }
+        });
+        builder.create();
+        return builder;
+    }
+
+    public void show(){
+        builder.show();
+    }
+
+    public AlertDialog.Builder create(){
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (checkSetDialog()) {
+                    process();
+                } else {
+                    Log.v("Show","show");
+                    builder.show();
+                }
+                ;
+            }
+        });
+        builder.create();
+        return builder;
+    }
+
+
+    public void process(){
+        // Store device parameters to database
+        // All checks are done before method call
+        DBHelper mDatabaseHelper = new DBHelper(context);
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        String name = nameedit.getText().toString().trim();
+        String IP = ipedit.getText().toString().trim();
+        String MAC = macedit.getText().toString().trim();
+
+        Log.v("Insert",name + " " + IP + " " + MAC);
+
+        values.put(DBHelper.DEVICE_NAME, name);
+        values.put(DBHelper.DEVICE_IP, IP);
+        values.put(DBHelper.DEVICE_MAC, MAC);
+        db.insert(DBHelper.TABLE_DEVICE, null, values);
+        db.close();
+
+    }
+
+    public void process(String DID){
+        DBHelper mDatabaseHelper = new DBHelper(context);
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        // Check if IP address was submitted and it's valid
+        String name = nameedit.getText().toString().trim();
+        String IP = ipedit.getText().toString().trim();
+        String MAC = macedit.getText().toString().trim();
+
+        Log.v("Insert","ID " + DID + " params: "+ name + " " + IP + " " + MAC);
+
+        values.put(DBHelper.DEVICE_NAME, name);
+        values.put(DBHelper.DEVICE_IP, IP);
+        values.put(DBHelper.DEVICE_MAC, MAC);
+
+        db.update(DBHelper.TABLE_DEVICE, values,
+                DBHelper._ID + "=" + DID,null);
 
     }
 

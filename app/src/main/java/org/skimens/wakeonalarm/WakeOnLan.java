@@ -37,13 +37,6 @@ public class WakeOnLan extends AsyncTask<Void,String,Void> {
 
     public void Wake(String ipStr,String macStr) {
 
-//        if (args.length != 2) {
-//            System.out.println("Usage: java WakeOnLan <broadcast-ip> <mac-address>");
-//            System.out.println("Example: java WakeOnLan 192.168.0.255 00:0D:61:08:22:4A");
-//            System.out.println("Example: java WakeOnLan 192.168.0.255 00-0D-61-08-22-4A");
-//            System.exit(1);
-//        }
-
         try {
             byte[] macBytes = getMacBytes(macStr);
             byte[] bytes = new byte[6 + 16 * macBytes.length];

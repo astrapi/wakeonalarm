@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -37,6 +38,8 @@ public class TimePickerActivity extends AppCompatActivity {
     String DIP;
     String DNAME;
     String DID;
+
+    boolean existed = false;
 
     ToggleButton monday;
     ToggleButton tuesday;
@@ -84,17 +87,20 @@ public class TimePickerActivity extends AppCompatActivity {
         Log.v("text", deviceInfo.toString());
         deviceInfo.setText(DNAME + " ( " + DIP + " )\n");
 
-        weekdays.post(new Runnable()
-        {
+        weekdays.post(new Runnable() {
             @Override
-            public void run(){
+            public void run() {
                 Log.v("TEST", "Layout width : " + weekdays.getWidth());
                 int width = weekdays.getWidth() / 7;
-                for(ToggleButton button : weekday){
-                           button.setLayoutParams(new LinearLayout.LayoutParams(width, width));
+                for (ToggleButton button : weekday) {
+                    button.setLayoutParams(new LinearLayout.LayoutParams(width, width));
                 }
             }
-        });}
+        });
+
+        setData();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -117,6 +123,39 @@ public class TimePickerActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public void setData(){
+        DBHelper db = new DBHelper(this);
+        SQLiteDatabase sdb = db.getReadableDatabase();
+        String query = "SELECT * FROM " + DBHelper.TABLE_ALARM + " WHERE " + DBHelper.ALARM_DEVICE_ID + "='" + DID +"'" ;
+        Log.v("QUERY",query);
+        Cursor cursor = sdb.rawQuery(query, null);
+        if(cursor != null && cursor.getCount() > 0){
+        while (cursor.moveToNext()) {
+            char[] days = cursor.getString(cursor
+                    .getColumnIndex(DBHelper.ALARM_DAYS)).toCharArray();
+            int time = cursor.getInt(cursor
+                    .getColumnIndex(DBHelper.ALARM_TIME));
+            boolean activate = cursor.getInt(cursor
+                    .getColumnIndex(DBHelper.ALARM_ACTIVE)) > 0;
+            boolean repeats = cursor.getInt(cursor
+                    .getColumnIndex(DBHelper.ALARM_REPEAT)) > 0;
+            Log.v("CURSOR", "FOR DID " + DID  + " SELECTED " + days.toString() + " active " + active + " repeat " + repeat + "time " + time);
+            for(int i=0; i < weekday.length;i++){
+                weekday[i].setChecked(days[i] != '0');
+            }
+            active.setChecked(activate);
+            repeat.setChecked(repeats);
+
+            timePicker.setCurrentHour(time / 60);
+            timePicker.setCurrentMinute(time % 60);
+
+            existed = true;
+
+
+        }}
+
+    };
 
 
 
@@ -141,23 +180,33 @@ public class TimePickerActivity extends AppCompatActivity {
 
         int rep;
         if(repeat.isChecked()){ rep = 1; } else { rep = 0; };
-        Log.v("ACTIVE",String.valueOf(rep));
+        Log.v("ACTIVE", String.valueOf(rep));
 
         DBHelper mDatabaseHelper = new DBHelper(this);
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(DBHelper.ALARM_DEVICE_ID, DID);
+
         values.put(DBHelper.ALARM_DAYS, days.toString());
         values.put(DBHelper.ALARM_TIME, time);
         values.put(DBHelper.ALARM_ACTIVE, act);
         values.put(DBHelper.ALARM_REPEAT, rep);
+
+        if(existed){
+        db.update(DBHelper.TABLE_ALARM, values,
+                    DBHelper.ALARM_DEVICE_ID + "=" + DID,null);
+        } else {
+        values.put(DBHelper.ALARM_DEVICE_ID, DID);
         db.insert(DBHelper.TABLE_ALARM, null, values);
+        }
 
         SetAlarm(time);
 
     }
 
-    public void Return(View view){};
+    public void Cancel(View view){
+        Intent back = new Intent(TimePickerActivity.this,MainActivity.class);
+        startActivity(back);
+    };
 
     public void SetAlarm(int time){
 
@@ -165,17 +214,23 @@ public class TimePickerActivity extends AppCompatActivity {
         int mins = time % 60;
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(calendar.HOUR_OF_DAY, hour);
-        calendar.set(calendar.MINUTE, mins);
-        calendar.set(calendar.SECOND, 0);
-        calendar.set(calendar.MILLISECOND, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, mins);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         long sdl = calendar.getTimeInMillis();
 
         Intent intent = new Intent(TimePickerActivity.this, AlarmReceiver.class);
         intent.putExtra("DID",DID);
         PendingIntent sender = PendingIntent.getBroadcast(TimePickerActivity.this, Integer.valueOf(DID), intent,PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarm = (AlarmManager)getSystemService(ALARM_SERVICE);
+        if(existed) { alarm.cancel(sender); };
+        if(active.isChecked()){
         alarm.setRepeating(AlarmManager.RTC_WAKEUP, sdl, AlarmManager.INTERVAL_DAY, sender);
+        } else {
+            alarm.cancel(sender);
+        };
+
 
     };
 

@@ -1,35 +1,52 @@
 package org.skimens.wakeonalarm;
 
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.BitmapFactory;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.Calendar;
 
 public class AlarmReceiver extends BroadcastReceiver{
 
+    Context context;
+    Intent intent;
+
+    String DID;
+    String IP;
+    String MAC;
+    String name;
+
     boolean active;
     boolean repeat;
     boolean current_day;
-    String IP;
-    String MAC;
-
-
 
     @Override
-    public void onReceive(Context context, Intent intent)
+    public void onReceive(Context c, Intent i)
     {
-        String DID = intent.getExtras().getString("DID");
+        context = c;
+        intent = i;
+
+        DID = intent.getExtras().getString("DID");
 
         DBHelper db = new DBHelper(context);
         SQLiteDatabase sdb = db.getReadableDatabase();
 
-        String query = "SELECT " + DBHelper.DEVICE_IP + " , " + DBHelper.DEVICE_MAC + " FROM " + DBHelper.TABLE_DEVICE + " WHERE " + DBHelper._ID +"='" + DID +"'" ;
+        String query = "SELECT " + DBHelper.DEVICE_NAME + " , " + DBHelper.DEVICE_IP + " , " + DBHelper.DEVICE_MAC + " FROM " + DBHelper.TABLE_DEVICE + " WHERE " + DBHelper._ID +"='" + DID +"'" ;
         Cursor cursor = sdb.rawQuery(query, null);
         while (cursor.moveToNext()) {
+            name = cursor.getString(cursor
+                    .getColumnIndex(DBHelper.DEVICE_NAME));
             IP = cursor.getString(cursor
                     .getColumnIndex(DBHelper.DEVICE_IP));
             MAC = cursor.getString(cursor
@@ -53,17 +70,46 @@ public class AlarmReceiver extends BroadcastReceiver{
                     .getColumnIndex(DBHelper.ALARM_REPEAT)) > 0;
             Log.v("CURSOR", "FOR DID " + DID  + " SELECTED " + current_day + " active " + active + " repeat " + repeat);
         }
-        cursor.close();
+
             Log.v("cur", String.valueOf(current_day));
         if(active && current_day) {
             Log.v("act",String.valueOf(active));
-
                 new WakeOnLan(IP,MAC).execute();
+                sendNotification();
+            }
 
-
+            if(!active){
+                PendingIntent sender = PendingIntent.getBroadcast(context,Integer.valueOf(DID),intent,PendingIntent.FLAG_CANCEL_CURRENT);
+                AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                alarm.cancel(sender);
             }
         }
 
+    }
+
+    public void sendNotification(){
+                PendingIntent contentIntent = PendingIntent.getActivity(context,
+                        0, intent,
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+
+                Resources res = context.getResources();
+                Notification.Builder builder = new Notification.Builder(context);
+
+                String message = "Wake singal sent to " + name + " ( " + IP + " ) ";
+
+                builder.setContentIntent(contentIntent)
+                        .setSmallIcon(R.drawable.common_ic_googleplayservices)
+                        .setTicker(message)
+                        .setWhen(System.currentTimeMillis())
+                        .setAutoCancel(true)
+                        .setContentTitle("Wake on Alarm")
+                        .setContentText(message);
+
+                Notification notification = builder.build();
+
+                NotificationManager notificationManager = (NotificationManager) context
+                        .getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(Integer.valueOf(DID), notification);
     }
 
 }
