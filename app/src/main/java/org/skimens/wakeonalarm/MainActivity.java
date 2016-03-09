@@ -86,10 +86,7 @@ public class MainActivity extends AppCompatActivity {
         ad.setMessage(name + " ( " + IP + " )");
         ad.setPositiveButton("Edit", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
-                editDialog(DID,name,IP, MAC);
-                Toast.makeText(MainActivity.this, "Device was updated",
-                        Toast.LENGTH_LONG).show();
-                updateList();
+                editDialog(DID, name, IP, MAC);
             }
         });
         ad.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
@@ -108,15 +105,34 @@ public class MainActivity extends AppCompatActivity {
         ad.setOnCancelListener(new DialogInterface.OnCancelListener() {
             public void onCancel(DialogInterface dialog) {
             }
-        });}
+        });
+        ad.create();
+        ad.show();
+
+    }
 
 
-        public void editDialog(String DID, String name, String IP, String MAC) {
+        public void editDialog(final String DID, String name, String IP, String MAC) {
             // Shows dialog for adding device information
             // Validates parameters before call to db insert
-//            setDeviceDialog ad = new setDeviceDialog(MainActivity.this,name, IP, MAC);
-//            ad.create(DID);
-//            ad.show();
+            Log.v("editDialog",name + " " + IP + " " + MAC);
+            final setDeviceDialog dial = new setDeviceDialog(this,name, IP, MAC);
+            AlertDialog.Builder ad = dial.getDialog();
+            ad.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    if (dial.checkSetDialog()) {
+                        dial.process(DID);
+                        Toast.makeText(MainActivity.this, "Device was updated",
+                                Toast.LENGTH_LONG).show();
+                        updateList();
+                    } else {
+                        editDialog(DID, dial.getName(), dial.getIP(), dial.getMAC());
+                    }
+                    ;
+                }
+            });
+            ad.create();
+            ad.show();
             }
 
 
@@ -148,7 +164,8 @@ public class MainActivity extends AppCompatActivity {
                 cell.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        onLongTap(id,name,IP,MAC);
+                        Log.v("text", "long tap");
+                        onLongTap(id, name, IP, MAC);
                         return true;
                     }
                 });

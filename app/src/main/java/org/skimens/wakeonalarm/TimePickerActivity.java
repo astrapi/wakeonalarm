@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.Calendar;
@@ -230,8 +231,9 @@ public class TimePickerActivity extends AppCompatActivity {
         } else {
             alarm.cancel(sender);
         };
-
-
+        Toast.makeText(getBaseContext(), "Alarm preference for " + DNAME + " is saved", Toast.LENGTH_LONG).show();
+        Intent main = new Intent(TimePickerActivity.this,MainActivity.class);
+        startActivity(main);
     };
 
 

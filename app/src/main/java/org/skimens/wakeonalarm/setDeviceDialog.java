@@ -72,9 +72,25 @@ public class setDeviceDialog {
 
     }
 
+    public AlertDialog.Builder getDialog(){
+        return builder;
+    }
+
+    public String getName(){
+        return nameedit.getText().toString();
+    }
+
+    public String getIP(){
+        return ipedit.getText().toString();
+    }
+
+    public String getMAC(){
+        return macedit.getText().toString();
+    }
 
 
-    public static boolean checkSetDialog(){
+
+    public boolean checkSetDialog(){
         // Check if IP address was submitted and it's valid
         String name = nameedit.getText().toString().trim();
         String IP = ipedit.getText().toString().trim();
@@ -82,7 +98,7 @@ public class setDeviceDialog {
 
         if (IP.length() == 0) {
             Log.v("IP", " is null");
-//            Toast.makeText(context, "Please, submit IP address", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Please, submit IP address", Toast.LENGTH_LONG).show();
             return false;
         } else {
             final Pattern IPPATTERN = Pattern.compile(
@@ -118,43 +134,6 @@ public class setDeviceDialog {
         return true;
 
     }
-
-
-    public AlertDialog.Builder create(final String DID){
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                if (checkSetDialog()) {
-                    process(DID);
-                } else {
-                    builder.show();
-                }
-                ;
-            }
-        });
-        builder.create();
-        return builder;
-    }
-
-    public void show(){
-        builder.show();
-    }
-
-    public AlertDialog.Builder create(){
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                if (checkSetDialog()) {
-                    process();
-                } else {
-                    Log.v("Show","show");
-                    builder.show();
-                }
-                ;
-            }
-        });
-        builder.create();
-        return builder;
-    }
-
 
     public void process(){
         // Store device parameters to database

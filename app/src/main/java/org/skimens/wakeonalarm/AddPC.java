@@ -2,6 +2,7 @@ package org.skimens.wakeonalarm;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -86,7 +87,19 @@ public class AddPC extends AppCompatActivity {
         // Shows dialog for adding device information
         // Validates parameters before call to db insert
         Log.v("addDialog",name + " " + IP + " " + MAC);
-        AlertDialog.Builder ad = new setDeviceDialog(this,name, IP, MAC).create();
+        final setDeviceDialog dial = new setDeviceDialog(this,name, IP, MAC);
+        AlertDialog.Builder ad = dial.getDialog();
+        ad.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (dial.checkSetDialog()) {
+                    dial.process();
+                } else {
+                    addDialog(dial.getName(),dial.getIP(),dial.getMAC());
+                }
+                ;
+            }
+        });
+        ad.create();
         ad.show();
         }
 
