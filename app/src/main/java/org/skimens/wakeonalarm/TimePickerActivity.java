@@ -7,20 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -77,6 +72,7 @@ public class TimePickerActivity extends AppCompatActivity {
         active = (CheckBox) findViewById(R.id.active);
 
         timePicker = (TimePicker) findViewById(R.id.timePicker);
+        timePicker.setIs24HourView(true);
 
         DIP = getIntent().getExtras().getString("IP");
         DNAME = getIntent().getExtras().getString("name");
@@ -87,6 +83,7 @@ public class TimePickerActivity extends AppCompatActivity {
         TextView deviceInfo = (TextView) findViewById(R.id.deviceInfo);
         Log.v("text", deviceInfo.toString());
         deviceInfo.setText(DNAME + " ( " + DIP + " )\n");
+        deviceInfo.setTextSize(20);
 
         weekdays.post(new Runnable() {
             @Override
@@ -156,6 +153,8 @@ public class TimePickerActivity extends AppCompatActivity {
 
         }}
 
+
+
     };
 
 
@@ -200,16 +199,19 @@ public class TimePickerActivity extends AppCompatActivity {
         db.insert(DBHelper.TABLE_ALARM, null, values);
         }
 
+        db.close();
+
         SetAlarm(time);
 
     }
 
     public void Cancel(View view){
-        Intent back = new Intent(TimePickerActivity.this,MainActivity.class);
-        startActivity(back);
+        finish();
     };
 
     public void SetAlarm(int time){
+
+        Log.v("lol",String.valueOf(time));
 
         int hour = time / 60;
         int mins = time % 60;
@@ -219,21 +221,35 @@ public class TimePickerActivity extends AppCompatActivity {
         calendar.set(Calendar.MINUTE, mins);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+        // if current time of the day more than alarm time
+        // it will fire immediately, to prevent it add one day
+        if(System.currentTimeMillis() - calendar.getTimeInMillis() > 0){
+        calendar.add(Calendar.DATE, 1);}
         long sdl = calendar.getTimeInMillis();
+
 
         Intent intent = new Intent(TimePickerActivity.this, AlarmReceiver.class);
         intent.putExtra("DID",DID);
         PendingIntent sender = PendingIntent.getBroadcast(TimePickerActivity.this, Integer.valueOf(DID), intent,PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarm = (AlarmManager)getSystemService(ALARM_SERVICE);
-        if(existed) { alarm.cancel(sender); };
-        if(active.isChecked()){
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, sdl, AlarmManager.INTERVAL_DAY, sender);
-        } else {
-            alarm.cancel(sender);
+        if(existed) {
+            PendingIntent send = PendingIntent.getBroadcast(this,Integer.valueOf(DID),intent,PendingIntent.FLAG_CANCEL_CURRENT);
+            AlarmManager al = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            al.cancel(send);
         };
-        Toast.makeText(getBaseContext(), "Alarm preference for " + DNAME + " is saved", Toast.LENGTH_LONG).show();
-        Intent main = new Intent(TimePickerActivity.this,MainActivity.class);
-        startActivity(main);
+        if(active.isChecked()){
+            alarm.setRepeating(AlarmManager.RTC_WAKEUP, sdl, AlarmManager.INTERVAL_DAY, sender);
+            Toast.makeText(getBaseContext(), "Alarm preference for " + DNAME + " is saved", Toast.LENGTH_LONG).show();
+        } else {
+            PendingIntent send = PendingIntent.getBroadcast(this,Integer.valueOf(DID),intent,PendingIntent.FLAG_CANCEL_CURRENT);
+            AlarmManager al = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            al.cancel(send);
+            Toast.makeText(getBaseContext(), "Alarm for " + DNAME + " is inactivate", Toast.LENGTH_LONG).show();
+        };
+        Log.v("lol","11");
+        Intent intentz = new Intent(TimePickerActivity.this,MainActivity.class);
+        startActivity(intentz);
+
     };
 
 

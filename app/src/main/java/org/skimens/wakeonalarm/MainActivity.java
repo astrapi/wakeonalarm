@@ -4,17 +4,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -25,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
-    TableLayout deviceList;
+    LinearLayout deviceList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        deviceList = (TableLayout) findViewById(R.id.devicelist);
+        deviceList = (LinearLayout) findViewById(R.id.devicelist);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -139,63 +144,28 @@ public class MainActivity extends AppCompatActivity {
         public void updateList(){
 
             deviceList.removeAllViews();
+            deviceList.setDividerPadding(1);
             DBHelper db = new DBHelper(this);
             SQLiteDatabase sdb = db.getReadableDatabase();
 
             String query = "SELECT * FROM " + DBHelper.TABLE_DEVICE;
-            Cursor cursor2 = sdb.rawQuery(query, null);
-            while (cursor2.moveToNext()) {
-                final int id = cursor2.getInt(cursor2
+            Cursor cursor = sdb.rawQuery(query, null);
+            while (cursor.moveToNext()) {
+                final int id = cursor.getInt(cursor
                         .getColumnIndex(DBHelper._ID));
-                final String name = cursor2.getString(cursor2
+                final String name = cursor.getString(cursor
                         .getColumnIndex(DBHelper.DEVICE_NAME));
-                final String IP = cursor2.getString(cursor2
+                final String IP = cursor.getString(cursor
                         .getColumnIndex(DBHelper.DEVICE_IP));
-                final String MAC = cursor2.getString(cursor2
+                final String MAC = cursor.getString(cursor
                         .getColumnIndex(DBHelper.DEVICE_MAC));
                 Log.v("CURSOR", "ROW " + id + " HAS NAME " + name + " " + IP + " " + MAC);
-
-                TableRow tableRow = new TableRow(this);
-                tableRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                TextView cell = new TextView(this);
-                cell.setText(name + "\n" + IP + "\n" + MAC);
-                cell.setPadding(10, 0, 15, 5);
-                cell.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        Log.v("text", "long tap");
-                        onLongTap(id, name, IP, MAC);
-                        return true;
-                    }
-                });
-                Button alarmbt = new Button(this);
-                alarmbt.setText("Set Alarm");
-                alarmbt.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent TimePickerActivity = new Intent(MainActivity.this,TimePickerActivity.class);
-                        TimePickerActivity.putExtra("IP", IP);
-                        TimePickerActivity.putExtra("name", name);
-                        TimePickerActivity.putExtra("ID", String.valueOf(id));
-                        startActivity(TimePickerActivity);
-                    }
-                });
-                Button wakebt = new Button(this);
-                wakebt.setText("Wake");
-                wakebt.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new WakeOnLan(IP, MAC).execute();
-                        Toast.makeText(getBaseContext(), "Wake signal sent to " + name, Toast.LENGTH_LONG).show();
-                    }
-                });
-                tableRow.addView(cell, 0);
-                tableRow.addView(alarmbt, 1);
-                tableRow.addView(wakebt, 1);
-                deviceList.addView(tableRow, deviceList.getChildCount() - 1);
+                deviceLayout dl = new deviceLayout(MainActivity.this,name,IP,MAC);
+                LinearLayout mainLayout = dl.getLayout(id);
+                deviceList.addView(mainLayout, deviceList.getChildCount() - 1);
+                Log.v("lol",String.valueOf(deviceList.getChildCount()));
             }
-            cursor2.close();
+            cursor.close();
 
     }
 

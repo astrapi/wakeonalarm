@@ -17,20 +17,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text=""
+        android:gravity="center"
         android:id="@+id/deviceInfo" />
 
     <TimePicker
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/timePicker" />
+        android:id="@+id/timePicker"
+        android:layout_gravity="center"
+        android:foregroundGravity="center_horizontal" />
 
     <LinearLayout
         android:id="@+id/weekdays"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
+        android:layout_gravity="bottom"
+        android:foregroundGravity="center_horizontal">
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -76,10 +79,10 @@
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
+        android:gravity="center">
         <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -93,25 +96,25 @@
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
+        android:layout_height="fill_parent"
+        android:gravity="bottom">
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="Return"
+            android:onClick="Cancel"
             android:text="Cancel"
+            android:layout_weight="1"
             android:id="@+id/cancel" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="ProcessSettings"
             android:text="Ok"
+            android:layout_weight="1"
             android:id="@+id/okbutton" />
     </LinearLayout>
-
-
 
 
 </LinearLayout>

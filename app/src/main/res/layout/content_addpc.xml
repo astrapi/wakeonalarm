@@ -12,9 +12,18 @@
     tools:context="org.skimens.wakeonalarm.AddPC"
     tools:showIn="@layout/activity_addpc">
 
-    <TableLayout
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/scrollView"
+        android:layout_gravity="center_vertical" >
+    <LinearLayout
         android:orientation="vertical"
         android:id="@+id/devicelist"
+        android:dividerPadding="10dp"
+        android:showDividers="middle"
+        android:divider="@drawable/separator"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"></TableLayout>
+        android:layout_height="match_parent"></LinearLayout>
+    </ScrollView>
 </LinearLayout>
