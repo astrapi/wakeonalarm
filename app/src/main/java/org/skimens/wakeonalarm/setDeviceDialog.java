@@ -69,7 +69,10 @@ public class setDeviceDialog {
         layout.addView(macedit);
         builder.setView(layout);
         builder.setCancelable(true);
-
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
     }
 
     public AlertDialog.Builder getDialog(){
@@ -153,6 +156,7 @@ public class setDeviceDialog {
         values.put(DBHelper.DEVICE_MAC, MAC);
         db.insert(DBHelper.TABLE_DEVICE, null, values);
         db.close();
+        Toast.makeText(context, name + " was added to the list", Toast.LENGTH_LONG).show();
 
     }
 

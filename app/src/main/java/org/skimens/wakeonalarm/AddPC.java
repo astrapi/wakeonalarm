@@ -1,9 +1,7 @@
 package org.skimens.wakeonalarm;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -18,9 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
-import android.view.ViewGroup.LayoutParams;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -29,7 +24,7 @@ import java.net.InetAddress;
 
 public class AddPC extends AppCompatActivity {
 
-    TableLayout deviceList;
+    LinearLayout deviceList;
 
     String localIP = "";
 
@@ -37,7 +32,7 @@ public class AddPC extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addpc);
-        deviceList = (TableLayout) findViewById(R.id.devicelist);
+        deviceList = (LinearLayout) findViewById(R.id.devicelist);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbaraddpc);
         setSupportActionBar(toolbar);
 
@@ -93,6 +88,7 @@ public class AddPC extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int id) {
                 if (dial.checkSetDialog()) {
                     dial.process();
+                    // toast here
                 } else {
                     addDialog(dial.getName(),dial.getIP(),dial.getMAC());
                 }
@@ -145,20 +141,9 @@ public class AddPC extends AppCompatActivity {
             if(MAC == null){return;};
             String info = name + "\n" + IP + " (" + MAC + ")";
             Log.v("onProgressUpdate","Got result " + name);
-            LinearLayout list = new TableRow(context);
-            list.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.WRAP_CONTENT));
-            TextView cell = new TextView(context);
-            cell.setText(info);
-            cell.setPadding(10, 0, 15, 5);
-            cell.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    addDialog(name,IP,MAC);
-                }
-            });
-            list.addView(cell, 0);
-            deviceList.addView(list,deviceList.getChildCount()-1);
+            deviceLayout dl = new deviceLayout(context,name,IP,MAC);
+            LinearLayout mainLayout = dl.getLayout();
+            deviceList.addView(mainLayout,deviceList.getChildCount()-1);
         }
 
 
