@@ -81,7 +81,6 @@ public class TimePickerActivity extends AppCompatActivity {
         Log.v("GetIntent",DNAME + " ( " + DIP + " ) " + DID);
 
         TextView deviceInfo = (TextView) findViewById(R.id.deviceInfo);
-        Log.v("text", deviceInfo.toString());
         deviceInfo.setText(DNAME + " ( " + DIP + " )\n");
         deviceInfo.setTextSize(20);
 
@@ -98,28 +97,6 @@ public class TimePickerActivity extends AppCompatActivity {
 
         setData();
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public void setData(){
@@ -223,30 +200,33 @@ public class TimePickerActivity extends AppCompatActivity {
         calendar.set(Calendar.MILLISECOND, 0);
         // if current time of the day more than alarm time
         // it will fire immediately, to prevent it add one day
-        if(System.currentTimeMillis() - calendar.getTimeInMillis() > 0){
+        Log.v("sys",String.valueOf(System.currentTimeMillis()));
+        Log.v("cal", String.valueOf(calendar.getTimeInMillis()));
+        Log.v("times",String.valueOf(System.currentTimeMillis() > calendar.getTimeInMillis()));
+        if(System.currentTimeMillis() > calendar.getTimeInMillis()){
         calendar.add(Calendar.DATE, 1);}
         long sdl = calendar.getTimeInMillis();
 
 
         Intent intent = new Intent(TimePickerActivity.this, AlarmReceiver.class);
         intent.putExtra("DID",DID);
-        PendingIntent sender = PendingIntent.getBroadcast(TimePickerActivity.this, Integer.valueOf(DID), intent,PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarm = (AlarmManager)getSystemService(ALARM_SERVICE);
+
         if(existed) {
             PendingIntent send = PendingIntent.getBroadcast(this,Integer.valueOf(DID),intent,PendingIntent.FLAG_CANCEL_CURRENT);
             AlarmManager al = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             al.cancel(send);
         };
         if(active.isChecked()){
+            PendingIntent sender = PendingIntent.getBroadcast(TimePickerActivity.this, Integer.valueOf(DID), intent,PendingIntent.FLAG_UPDATE_CURRENT);
+            AlarmManager alarm = (AlarmManager)getSystemService(ALARM_SERVICE);
             alarm.setRepeating(AlarmManager.RTC_WAKEUP, sdl, AlarmManager.INTERVAL_DAY, sender);
-            Toast.makeText(getBaseContext(), "Alarm preference for " + DNAME + " is saved", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), String.format(getResources().getString(R.string.alarm_preference_is_saved), DNAME), Toast.LENGTH_LONG).show();
         } else {
             PendingIntent send = PendingIntent.getBroadcast(this,Integer.valueOf(DID),intent,PendingIntent.FLAG_CANCEL_CURRENT);
             AlarmManager al = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             al.cancel(send);
-            Toast.makeText(getBaseContext(), "Alarm for " + DNAME + " is inactivate", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), String.format(getResources().getString(R.string.alarm_is_inactive), DNAME), Toast.LENGTH_LONG).show();
         };
-        Log.v("lol","11");
         Intent intentz = new Intent(TimePickerActivity.this,MainActivity.class);
         startActivity(intentz);
 

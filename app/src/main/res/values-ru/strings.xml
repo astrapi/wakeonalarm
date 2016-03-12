@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delete">Удалить</string>
+    <string name="device_was_deleted">Устройство удалено</string>
+    <string name="device_was_updated">Устройство обновлено</string>
+    <string name="edit">Править</string>
+    <string name="select_action">Выберите действие</string>
+    <string name="active">Активировать</string>
+    <string name="add_device">Добавить</string>
+    <string name="added_to_list">%1$s добавлен в список устройств</string>
+    <string name="alarm_is_inactive">Будильник для %1$s деактивирован</string>
+    <string name="alarm_preference_is_saved">Настройки будильника для %1$s сохранены</string>
+    <string name="cancel">Отмена</string>
+    <string name="custom_name_for_device">\n Произвольное имя</string>
+    <string name="fr">ПТ</string>
+    <string name="ip_address">IP адрес:</string>
+    <string name="ip_not_valid">IP адрес не верен</string>
+    <string name="mac_address">МАС адрес:</string>
+    <string name="mac_not_valid">MAC адрес не верен</string>
+    <string name="mo">ПН</string>
+    <string name="repeat">Повтор</string>
+    <string name="sa">СБ</string>
+    <string name="su">ВС</string>
+    <string name="submit_ip">Пожалуйста, укажите IP адрес</string>
+    <string name="submit_mac">Пожалуйста, укажите МАС адрес</string>
+    <string name="submit_name">Пожалуйста, укажите произвольное имя</string>
+    <string name="th">ЧТ</string>
+    <string name="tu">ВТ</string>
+    <string name="wake_packet_sent_to">Пакет для %1$s ( %2$s ) послан</string>
+    <string name="we">СР</string>
+    <string name="wifi_not_found">Не смог получить IP адрес через WiFi</string>
+</resources>

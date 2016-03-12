@@ -2,6 +2,7 @@ package org.skimens.wakeonalarm;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -32,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
     LinearLayout deviceList;
 
+    Resources RS;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         deviceList = (LinearLayout) findViewById(R.id.devicelist);
+        RS = getResources();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -55,46 +59,23 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         updateList();}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
     public void addPC(View view) {
         Intent addPC = new Intent(MainActivity.this,AddPC.class);
         startActivity(addPC);
           }
 
 
-    public void onLongTap(Integer id,final String name,final String IP,final String MAC){
+    public void onDeviceClick(Integer id,final String name,final String IP,final String MAC){
         final String DID = String.valueOf(id);
         AlertDialog.Builder ad = new AlertDialog.Builder(this);
-        ad.setTitle("Choose action");
+        ad.setTitle(RS.getString(R.string.select_action));
         ad.setMessage(name + " ( " + IP + " )");
-        ad.setPositiveButton("Edit", new DialogInterface.OnClickListener() {
+        ad.setPositiveButton(RS.getString(R.string.edit), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
                 editDialog(DID, name, IP, MAC);
             }
         });
-        ad.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+        ad.setNegativeButton(RS.getString(R.string.delete), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
                 DBHelper mDatabaseHelper = new DBHelper(MainActivity.this);
                 SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
@@ -102,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 db.delete(DBHelper.TABLE_DEVICE, DBHelper._ID + "=" + DID, null);
                 db.close();
                 updateList();
-                Toast.makeText(MainActivity.this, "Device was deleted",
+                Toast.makeText(MainActivity.this, RS.getString(R.string.device_was_deleted),
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -127,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int id) {
                     if (dial.checkSetDialog()) {
                         dial.process(DID);
-                        Toast.makeText(MainActivity.this, "Device was updated",
+                        Toast.makeText(MainActivity.this, RS.getString(R.string.device_was_updated),
                                 Toast.LENGTH_LONG).show();
                         updateList();
                     } else {

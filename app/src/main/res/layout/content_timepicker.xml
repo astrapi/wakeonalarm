@@ -37,44 +37,44 @@
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOff="Mo"
-            android:textOn="Mo"
+            android:textOff="@string/mo"
+            android:textOn="@string/mo"
             android:id="@+id/monday" />
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOff="Tu"
-            android:textOn="Tu"
+            android:textOff="@string/tu"
+            android:textOn="@string/tu"
             android:id="@+id/tuesday" />
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOff="We"
-            android:textOn="We"
+            android:textOff="@string/we"
+            android:textOn="@string/we"
             android:id="@+id/wednesday" />
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOff="Th"
-            android:textOn="Th"
+            android:textOff="@string/th"
+            android:textOn="@string/th"
             android:id="@+id/thursday" />
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOff="Fr"
-            android:textOn="Fr"
+            android:textOff="@string/fr"
+            android:textOn="@string/fr"
             android:id="@+id/friday" />
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOff="Sa"
-            android:textOn="Sa"
+            android:textOff="@string/sa"
+            android:textOn="@string/sa"
             android:id="@+id/saturday" />
         <ToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOff="Su"
-            android:textOn="Su"
+            android:textOff="@string/su"
+            android:textOn="@string/su"
             android:id="@+id/sunday" />
     </LinearLayout>
 
@@ -86,12 +86,13 @@
         <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Repeat"
+        android:text="@string/repeat"
+        android:visibility="invisible"
         android:id="@+id/repeat" />
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Active"
+            android:text="@string/active"
             android:id="@+id/active" />
     </LinearLayout>
 
@@ -104,7 +105,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="Cancel"
-            android:text="Cancel"
+            android:text="@string/cancel"
             android:layout_weight="1"
             android:id="@+id/cancel" />
         <Button

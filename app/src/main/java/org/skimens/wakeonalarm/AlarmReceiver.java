@@ -35,6 +35,7 @@ public class AlarmReceiver extends BroadcastReceiver{
         intent = i;
 
         DID = intent.getExtras().getString("DID");
+        Log.v("OnR",DID);
 
         DBHelper db = new DBHelper(context);
         SQLiteDatabase sdb = db.getReadableDatabase();
@@ -92,15 +93,15 @@ public class AlarmReceiver extends BroadcastReceiver{
                 Resources res = context.getResources();
                 Notification.Builder builder = new Notification.Builder(context);
 
-                String message = "Wake singal sent to " + name + " ( " + IP + " ) ";
+                String message = String.format(res.getString(R.string.wake_packet_sent_to), name, IP);
 
                 builder.setContentIntent(contentIntent)
-                        .setSmallIcon(R.drawable.common_ic_googleplayservices)
+                        .setSmallIcon(R.drawable.ic_alarm_on_black)
                         .setTicker(message)
                         .setWhen(System.currentTimeMillis())
                         .setAutoCancel(true)
-                        .setContentTitle("Wake on Alarm")
-                        .setContentText(message);
+                        .setContentTitle(res.getString(R.string.app_name))
+                                .setContentText(message);
 
                 Notification notification = builder.build();
 

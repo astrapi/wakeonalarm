@@ -2,11 +2,15 @@ package org.skimens.wakeonalarm;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,6 +18,7 @@ import android.widget.Toast;
 public class deviceLayout {
 
     Context context;
+    Resources RS;
 
     LinearLayout mainLayout;
     LinearLayout buttonLayout;
@@ -24,11 +29,14 @@ public class deviceLayout {
     String MAC;
 
     public deviceLayout(Context c, String name,String ip,String mac){
+        this.RS = c.getResources();
         this.context = c;
         this.name = name;
         this.IP = ip;
         this.MAC = mac;
         initCommonElements();
+
+
     };
 
     public LinearLayout getLayout(int id)
@@ -82,8 +90,27 @@ public class deviceLayout {
 
 
        public void setButtons(final int id){
-           Button alarmbt = new Button(context);
-           alarmbt.setText("Alarm");
+           boolean active = false;
+
+           DBHelper db = new DBHelper(context);
+           SQLiteDatabase sdb = db.getReadableDatabase();
+           String query = "SELECT " + DBHelper.ALARM_ACTIVE +" FROM " + DBHelper.TABLE_ALARM + " WHERE " + DBHelper.ALARM_DEVICE_ID + "=" + String.valueOf(id);
+           Cursor cursor = sdb.rawQuery(query, null);
+           while (cursor.moveToNext()) {
+               active = cursor.getInt(cursor
+                       .getColumnIndex(DBHelper.ALARM_ACTIVE)) > 0;}
+           cursor.close();
+
+           ImageButton alarmbt = new ImageButton(context);
+           alarmbt.setBackgroundResource(0);
+           if(active) {
+               alarmbt.setImageDrawable(RS.getDrawable(R.drawable.ic_alarm_on_black));
+           } else {
+               alarmbt.setImageDrawable(RS.getDrawable(R.drawable.ic_alarm_add_black));
+           }
+
+
+
            alarmbt.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                    LinearLayout.LayoutParams.WRAP_CONTENT));
            alarmbt.setOnClickListener(new View.OnClickListener() {
@@ -96,15 +123,16 @@ public class deviceLayout {
                    context.startActivity(TimePickerActivity);
                }
            });
-           Button wakebt = new Button(context);
+           ImageButton wakebt = new ImageButton(context);
+           wakebt.setBackgroundResource(0);
            wakebt.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                    LinearLayout.LayoutParams.WRAP_CONTENT));
-           wakebt.setText("Wake");
+           wakebt.setImageDrawable(RS.getDrawable(R.drawable.ic_move_to_inbox_black));
            wakebt.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View v) {
                    new WakeOnLan(IP, MAC).execute();
-                   Toast.makeText(context, "Wake signal sent to " + name, Toast.LENGTH_LONG).show();
+                   Toast.makeText(context, String.format(RS.getString(R.string.wake_packet_sent_to),name,IP), Toast.LENGTH_LONG).show();
                }
            });
            buttonLayout.addView(alarmbt, 0);
@@ -113,7 +141,7 @@ public class deviceLayout {
            textLayout.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View v) {
-                   ((MainActivity) context).editDialog(String.valueOf(id), name, IP, MAC);
+                   ((MainActivity) context).onDeviceClick(id, name, IP, MAC);
                }
 
                ;
@@ -122,8 +150,11 @@ public class deviceLayout {
 
 
     public void setButtons(){
-        Button addbt = new Button(context);
-        addbt.setText("Add");
+        ImageButton addbt = new ImageButton(context);
+        addbt.setBackgroundResource(0);
+        addbt.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        addbt.setImageDrawable(RS.getDrawable(R.drawable.ic_add_circle_outline_black));
         addbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

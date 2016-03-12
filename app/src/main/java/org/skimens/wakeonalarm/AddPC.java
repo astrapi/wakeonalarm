@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -35,6 +36,8 @@ public class AddPC extends AppCompatActivity {
         deviceList = (LinearLayout) findViewById(R.id.devicelist);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbaraddpc);
         setSupportActionBar(toolbar);
+
+        Menu renew = (Menu) findViewById(R.id.action_settings);
 
         // Get IP of android phone from WIFI to search LAN for available devices
         WifiManager wifiMan = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -63,19 +66,19 @@ public class AddPC extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void renew(MenuItem item){
+        WifiManager wifiMan = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInf = wifiMan.getConnectionInfo();
+        int ipAddress = wifiInf.getIpAddress();
+        Log.v("IPINT",String.valueOf(ipAddress));
+        if(ipAddress != 0){
+            localIP = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff),
+                    (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
+            new NetworkDiscovery(this,localIP).execute();
+        deviceList.removeAllViewsInLayout();
+        new NetworkDiscovery(this,localIP).execute();
+        } else {
+            Toast.makeText(this, getResources().getString(R.string.wifi_not_found), Toast.LENGTH_LONG).show();}
     }
 
     public void addDialog(String name,String IP,String MAC){

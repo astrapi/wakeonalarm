@@ -2,6 +2,8 @@
 .gradle
 .navigation
 /app/src/test/
+/app/src/main/java/org/skimens/wakeonalarm/MyAnalytics.java
+/app/google-services.json
 /app/proguard-rules.pro
 /app/app-release.apk
 /local.properties

@@ -3,6 +3,7 @@ package org.skimens.wakeonalarm;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
@@ -25,20 +26,23 @@ public class setDeviceDialog {
     public static EditText nameedit;
     public static EditText ipedit;
     public static EditText macedit;
+    Resources RS;
 
     public setDeviceDialog(Context c,String name,String IP,String MAC){
+        RS = c.getResources();
+
         Log.v("Call","init");
         context = c;
         builder = new AlertDialog.Builder(context);
 
-        builder.setTitle("Add device");
+        builder.setTitle(RS.getString(R.string.custom_name_for_device));
 
         LinearLayout layout = new LinearLayout(context);
         layout.setGravity(Gravity.CENTER_HORIZONTAL);
         layout.setOrientation(LinearLayout.VERTICAL);
 
         TextView nametext = new TextView(context);
-        nametext.setText("\n Custom name for device: ");
+        nametext.setText(RS.getString(R.string.add_device));
         layout.addView(nametext);
 
         nameedit = new EditText(context);
@@ -47,7 +51,7 @@ public class setDeviceDialog {
         layout.addView(nameedit);
 
         TextView iptext = new TextView(context);
-        iptext.setText(" IP address: ");
+        iptext.setText(RS.getString(R.string.ip_address));
         layout.addView(iptext);
 
         ipedit = new EditText(context);
@@ -58,7 +62,7 @@ public class setDeviceDialog {
         layout.addView(ipedit);
 
         TextView mactext = new TextView(context);
-        mactext.setText(" MAC address: ");
+        mactext.setText(RS.getString(R.string.mac_address));
         layout.addView(mactext);
 
         macedit = new EditText(context);
@@ -69,7 +73,7 @@ public class setDeviceDialog {
         layout.addView(macedit);
         builder.setView(layout);
         builder.setCancelable(true);
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(RS.getString(R.string.cancel), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
             }
         });
@@ -101,27 +105,27 @@ public class setDeviceDialog {
 
         if (IP.length() == 0) {
             Log.v("IP", " is null");
-            Toast.makeText(context, "Please, submit IP address", Toast.LENGTH_LONG).show();
+            Toast.makeText(context,RS.getString(R.string.submit_ip), Toast.LENGTH_LONG).show();
             return false;
         } else {
             final Pattern IPPATTERN = Pattern.compile(
                     "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
             if (!IPPATTERN.matcher(IP).matches()) {
                 Log.v("IP", " is null");
-                Toast.makeText(context, "IP address is not valid", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, RS.getString(R.string.ip_not_valid), Toast.LENGTH_LONG).show();
                 return false;
             }
         }
         if (MAC.length() == 0) {
             Log.v("MAC", " is null");
-            Toast.makeText(context, "Please, submit MAC address", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, RS.getString(R.string.submit_mac), Toast.LENGTH_LONG).show();
             return false;
         } else {
             final Pattern MACPATTERN = Pattern.compile(
                     "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$");
             if (!MACPATTERN.matcher(MAC).matches()) {
                 Log.v("MAC", " is null");
-                Toast.makeText(context, "MAC address is not valid", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, RS.getString(R.string.mac_not_valid), Toast.LENGTH_LONG).show();
                 return false;
             }
         }
@@ -129,7 +133,7 @@ public class setDeviceDialog {
         Log.v("name", "name is " + name);
         if (name.length() == 0) {
             Log.v("name", " is null");
-            Toast.makeText(context, "Please, write custom name", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, RS.getString(R.string.submit_name), Toast.LENGTH_LONG).show();
             return false;
         }
 
@@ -156,7 +160,7 @@ public class setDeviceDialog {
         values.put(DBHelper.DEVICE_MAC, MAC);
         db.insert(DBHelper.TABLE_DEVICE, null, values);
         db.close();
-        Toast.makeText(context, name + " was added to the list", Toast.LENGTH_LONG).show();
+        Toast.makeText(context, RS.getString(R.string.added_to_list), Toast.LENGTH_LONG).show();
 
     }
 

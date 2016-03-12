@@ -1,4 +1,33 @@
 <resources>
-    <string name="app_name">Wake on Alarm</string>
-    <string name="action_settings">Settings</string>
+    <string translatable="false" name="app_name">Wake on Alarm</string>
+    <string translatable="false" name="action_settings">Settings</string>
+    <string name="select_action">Select action</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="device_was_deleted">Device was deleted</string>
+    <string name="device_was_updated">Device was updated</string>
+    <string name="wake_packet_sent_to">Wake packet sent to  %1$s (  %2$s )</string>
+    <string name="alarm_preference_is_saved">Alarm preference for %1$s is saved"</string>
+    <string name="alarm_is_inactive">"Alarm for %1$s is inactivate"</string>
+    <string name="cancel">Cancel</string>
+    <string name="active">Active</string>
+    <string name="repeat">Repeat</string>
+    <string name="mo">MO</string>
+    <string name="tu">TU</string>
+    <string name="we">WE</string>
+    <string name="th">TH</string>
+    <string name="fr">FR</string>
+    <string name="sa">SA</string>
+    <string name="su">SU</string>
+    <string name="add_device">Add device</string>
+    <string name="custom_name_for_device">"\n Custom name for device: "</string>
+    <string name="ip_address">IP address:</string>
+    <string name="mac_address">MAC address:</string>
+    <string name="submit_ip">Please, submit IP address</string>
+    <string name="submit_mac">Please, submit MAC address</string>
+    <string name="submit_name">Please, submit custom name</string>
+    <string name="ip_not_valid">IP address is not valid</string>
+    <string name="mac_not_valid">MAC address is not valid</string>
+    <string name="added_to_list"> %1$s was added to the list</string>
+    <string name="wifi_not_found"> Couldn\'t get IP via WiFi</string>
 </resources>
