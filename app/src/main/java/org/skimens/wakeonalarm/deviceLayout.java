@@ -9,20 +9,24 @@ import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+/*
+Class for LinearLayout of Device list which used on Main and AddDevice Activite
+ */
+
 public class deviceLayout {
 
-    Context context;
-    Resources RS;
+    private Context context;
+    private Resources RS;
 
-    LinearLayout mainLayout;
-    LinearLayout buttonLayout;
-    LinearLayout textLayout;
+    private LinearLayout mainLayout;
+    private LinearLayout buttonLayout;
+    private LinearLayout textLayout;
 
     String IP;
     String name;
@@ -51,7 +55,9 @@ public class deviceLayout {
         return this.mainLayout;
     }
 
-
+    /*
+    Creating common elements which used on both activities
+     */
     private void initCommonElements() {
         mainLayout = new LinearLayout(context);
         mainLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -88,10 +94,12 @@ public class deviceLayout {
 
     };
 
-
+    /*
+    Set buttons for MainActivity
+     */
        public void setButtons(final int id){
+           // Set alarm button, image will depend if alarm is active
            boolean active = false;
-
            DBHelper db = new DBHelper(context);
            SQLiteDatabase sdb = db.getReadableDatabase();
            String query = "SELECT " + DBHelper.ALARM_ACTIVE +" FROM " + DBHelper.TABLE_ALARM + " WHERE " + DBHelper.ALARM_DEVICE_ID + "=" + String.valueOf(id);
@@ -99,7 +107,7 @@ public class deviceLayout {
            while (cursor.moveToNext()) {
                active = cursor.getInt(cursor
                        .getColumnIndex(DBHelper.ALARM_ACTIVE)) > 0;}
-           cursor.close();
+           sdb.close();
 
            ImageButton alarmbt = new ImageButton(context);
            alarmbt.setBackgroundResource(0);
@@ -108,9 +116,6 @@ public class deviceLayout {
            } else {
                alarmbt.setImageDrawable(RS.getDrawable(R.drawable.ic_alarm_add_black));
            }
-
-
-
            alarmbt.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                    LinearLayout.LayoutParams.WRAP_CONTENT));
            alarmbt.setOnClickListener(new View.OnClickListener() {
@@ -123,6 +128,7 @@ public class deviceLayout {
                    context.startActivity(TimePickerActivity);
                }
            });
+
            ImageButton wakebt = new ImageButton(context);
            wakebt.setBackgroundResource(0);
            wakebt.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -148,7 +154,9 @@ public class deviceLayout {
            });
        }
 
-
+    /*
+    Set button for AddDeviceActivity
+     */
     public void setButtons(){
         ImageButton addbt = new ImageButton(context);
         addbt.setBackgroundResource(0);
@@ -158,7 +166,7 @@ public class deviceLayout {
         addbt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((AddPC)context).addDialog(name, IP, MAC);
+                ((AddDeviceActivity)context).addDialog(name, IP, MAC);
             }
         });
         buttonLayout.addView(addbt, 0);

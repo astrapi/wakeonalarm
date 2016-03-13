@@ -6,7 +6,7 @@
     <string name="edit">編集</string>
     <string name="device_was_deleted">デバイスが削除しました</string>
     <string name="ip_address">IPアドレス</string>
-    <string name="ip_not_valid">IPアドレスは妥当ではありませｎ</string>
+    <string name="ip_not_valid">IPアドレスは妥当ではありません</string>
     <string name="mac_address">MACアドレス</string>
     <string name="mac_not_valid">MACアドレスは妥当ではありませｎ</string>
     <string name="custom_name_for_device">\nランダムの装置名</string>
@@ -26,6 +26,6 @@
     <string name="alarm_is_inactive">%1$sのアラームの時計が非アクティブ化しました</string>
     <string name="alarm_preference_is_saved">%1$sのアラームの時計がセーブしました</string>
     <string name="active">有効</string>
-    <string name="wake_packet_sent_to">WakeOnLANのパケットが%1$s(%2$s)に送りします</string>
+    <string name="wake_packet_sent_to">WakeOnLANのパケットが%1$s(%2$s)に送りしました</string>
     <string name="wifi_not_found">WIFIのIPアドレスがもらえませんでした</string>
 </resources>

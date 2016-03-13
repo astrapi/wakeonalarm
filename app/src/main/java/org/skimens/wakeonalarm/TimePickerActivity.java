@@ -12,8 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,28 +23,21 @@ import java.util.Calendar;
 
 public class TimePickerActivity extends AppCompatActivity {
 
-    TimePicker timePicker;
+    private final String TAG = "TimePicker";
 
-    LinearLayout weekdays;
+    private TimePicker timePicker;
+    private LinearLayout weekdays;
+    private ToggleButton[] weekdayArray;
+    private CheckBox repeat;
+    private CheckBox active;
 
-    ToggleButton[] weekday;
+    private String DIP;
+    private String DNAME;
+    private String DID;
 
-    String DIP;
-    String DNAME;
-    String DID;
+    private boolean existed = false;
 
-    boolean existed = false;
-
-    ToggleButton monday;
-    ToggleButton tuesday;
-    ToggleButton wednesday;
-    ToggleButton thursday;
-    ToggleButton friday;
-    ToggleButton saturday;
-    ToggleButton sunday;
-
-    CheckBox repeat;
-    CheckBox active;
+    private final DBHelper db = new DBHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,20 +46,7 @@ public class TimePickerActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        weekdays = (LinearLayout) findViewById(R.id.weekdays);
-
-        monday = (ToggleButton) findViewById(R.id.monday);
-        tuesday = (ToggleButton) findViewById(R.id.tuesday);
-        wednesday = (ToggleButton) findViewById(R.id.wednesday);
-        thursday = (ToggleButton) findViewById(R.id.thursday);
-        friday = (ToggleButton) findViewById(R.id.friday);
-        saturday = (ToggleButton) findViewById(R.id.saturday);
-        sunday = (ToggleButton) findViewById(R.id.sunday);
-
-        weekday = new ToggleButton[]{monday,tuesday,wednesday,thursday,friday,saturday,sunday};
-
         repeat = (CheckBox) findViewById(R.id.repeat);
-
         active = (CheckBox) findViewById(R.id.active);
 
         timePicker = (TimePicker) findViewById(R.id.timePicker);
@@ -77,33 +55,52 @@ public class TimePickerActivity extends AppCompatActivity {
         DIP = getIntent().getExtras().getString("IP");
         DNAME = getIntent().getExtras().getString("name");
         DID = getIntent().getExtras().getString("ID");
-
-        Log.v("GetIntent",DNAME + " ( " + DIP + " ) " + DID);
+        Log.i(TAG,"Information from intent: " + DNAME + " ( " + DIP + " ) " + DID);
 
         TextView deviceInfo = (TextView) findViewById(R.id.deviceInfo);
         deviceInfo.setText(DNAME + " ( " + DIP + " )\n");
         deviceInfo.setTextSize(20);
 
+        manageWeekdays();
+        setData();
+    }
+
+    /*
+    Managing weekdays togglebuttons
+     */
+    public void manageWeekdays(){
+        weekdays = (LinearLayout) findViewById(R.id.weekdays);
+
+        ToggleButton monday = (ToggleButton) findViewById(R.id.monday);
+        ToggleButton tuesday = (ToggleButton) findViewById(R.id.tuesday);
+        ToggleButton wednesday = (ToggleButton) findViewById(R.id.wednesday);
+        ToggleButton thursday = (ToggleButton) findViewById(R.id.thursday);
+        ToggleButton friday = (ToggleButton) findViewById(R.id.friday);
+        ToggleButton saturday = (ToggleButton) findViewById(R.id.saturday);
+        ToggleButton sunday = (ToggleButton) findViewById(R.id.sunday);
+
+        weekdayArray = new ToggleButton[]{monday,tuesday,wednesday,thursday,friday,saturday,sunday};
+
+        //Setting width of weekdays button to fit and fill into layout width
         weekdays.post(new Runnable() {
             @Override
             public void run() {
-                Log.v("TEST", "Layout width : " + weekdays.getWidth());
+                Log.i(TAG, "Layout width : " + weekdays.getWidth());
                 int width = weekdays.getWidth() / 7;
-                for (ToggleButton button : weekday) {
+                for (ToggleButton button : weekdayArray) {
                     button.setLayoutParams(new LinearLayout.LayoutParams(width, width));
                 }
             }
         });
 
-        setData();
-
     }
-
+    /*
+    Setting up user alarm data for device, if existed in db
+     */
     public void setData(){
-        DBHelper db = new DBHelper(this);
         SQLiteDatabase sdb = db.getReadableDatabase();
         String query = "SELECT * FROM " + DBHelper.TABLE_ALARM + " WHERE " + DBHelper.ALARM_DEVICE_ID + "='" + DID +"'" ;
-        Log.v("QUERY",query);
+        Log.i(TAG,"setData query: " + query);
         Cursor cursor = sdb.rawQuery(query, null);
         if(cursor != null && cursor.getCount() > 0){
         while (cursor.moveToNext()) {
@@ -115,9 +112,11 @@ public class TimePickerActivity extends AppCompatActivity {
                     .getColumnIndex(DBHelper.ALARM_ACTIVE)) > 0;
             boolean repeats = cursor.getInt(cursor
                     .getColumnIndex(DBHelper.ALARM_REPEAT)) > 0;
-            Log.v("CURSOR", "FOR DID " + DID  + " SELECTED " + days.toString() + " active " + active + " repeat " + repeat + "time " + time);
-            for(int i=0; i < weekday.length;i++){
-                weekday[i].setChecked(days[i] != '0');
+            Log.i(TAG, "setData result: " + DID  + " SELECTED " + days.toString() + " active " + activate + " repeat " + repeats + "time " + time);
+
+            for(int i=0; i < weekdayArray.length;i++){
+                weekdayArray[i].setChecked(days[i] != '0');
+
             }
             active.setChecked(activate);
             repeat.setChecked(repeats);
@@ -125,42 +124,43 @@ public class TimePickerActivity extends AppCompatActivity {
             timePicker.setCurrentHour(time / 60);
             timePicker.setCurrentMinute(time % 60);
 
+            // set true if row for device existed in table
             existed = true;
-
-
         }}
 
-
+        sdb.close();
 
     };
 
 
 
-
+    /*
+    Store user alarm setting for device into db
+     */
     public void ProcessSettings(View view)
     {
-        //Prepare data
+        //To store time in single db column
         int time = timePicker.getCurrentHour() * 60 + timePicker.getCurrentMinute();
-        Log.v("TIME",String.valueOf(time));
+        Log.i(TAG,"Time to store: " + String.valueOf(time));
 
 
+        // Days turn into char array to store in 1 db column
         StringBuilder days = new StringBuilder();
-        for(ToggleButton day : weekday){
+        for(ToggleButton day : weekdayArray){
             if(day.isChecked()){ days.append("1"); } else {days.append("0"); };
         }
 
-        Log.v("DAYS",days.toString());
+        Log.v(TAG,"Days to store: " + days.toString());
 
-        int act;
-        if(active.isChecked()){ act = 1; } else { act = 0; };
+        int act = 0;
+        if(active.isChecked()){ act = 1; };
         Log.v("ACTIVE",String.valueOf(act));
 
-        int rep;
-        if(repeat.isChecked()){ rep = 1; } else { rep = 0; };
+        int rep = 0;
+        if(repeat.isChecked()){ rep = 1; };
         Log.v("ACTIVE", String.valueOf(rep));
 
-        DBHelper mDatabaseHelper = new DBHelper(this);
-        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        SQLiteDatabase sdb = db.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(DBHelper.ALARM_DAYS, days.toString());
@@ -168,27 +168,32 @@ public class TimePickerActivity extends AppCompatActivity {
         values.put(DBHelper.ALARM_ACTIVE, act);
         values.put(DBHelper.ALARM_REPEAT, rep);
 
+        // if row for device existed in table - update or select
         if(existed){
-        db.update(DBHelper.TABLE_ALARM, values,
+        sdb.update(DBHelper.TABLE_ALARM, values,
                     DBHelper.ALARM_DEVICE_ID + "=" + DID,null);
         } else {
         values.put(DBHelper.ALARM_DEVICE_ID, DID);
-        db.insert(DBHelper.TABLE_ALARM, null, values);
+        sdb.insert(DBHelper.TABLE_ALARM, null, values);
         }
 
-        db.close();
+        sdb.close();
 
         SetAlarm(time);
 
     }
 
+    /*
+    Close activity on click Cancel button
+     */
     public void Cancel(View view){
         finish();
     };
 
+    /*
+    Setting up alarm for device
+     */
     public void SetAlarm(int time){
-
-        Log.v("lol",String.valueOf(time));
 
         int hour = time / 60;
         int mins = time % 60;
@@ -198,35 +203,41 @@ public class TimePickerActivity extends AppCompatActivity {
         calendar.set(Calendar.MINUTE, mins);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+
         // if current time of the day more than alarm time
         // it will fire immediately, to prevent it add one day
-        Log.v("sys",String.valueOf(System.currentTimeMillis()));
-        Log.v("cal", String.valueOf(calendar.getTimeInMillis()));
-        Log.v("times",String.valueOf(System.currentTimeMillis() > calendar.getTimeInMillis()));
         if(System.currentTimeMillis() > calendar.getTimeInMillis()){
-        calendar.add(Calendar.DATE, 1);}
-        long sdl = calendar.getTimeInMillis();
+            Log.i(TAG,"Add 1 day to calendar");
+            calendar.add(Calendar.DATE, 1);
+        }
 
-
-        Intent intent = new Intent(TimePickerActivity.this, AlarmReceiver.class);
-        intent.putExtra("DID",DID);
+        Intent alarmIntent = new Intent(TimePickerActivity.this, AlarmReceiver.class);
+        alarmIntent.putExtra("DID", DID);
+        int did = Integer.valueOf(DID);
 
         if(existed) {
-            PendingIntent send = PendingIntent.getBroadcast(this,Integer.valueOf(DID),intent,PendingIntent.FLAG_CANCEL_CURRENT);
+            // Cancel existed alarms for device before inserting new
+            Log.i(TAG,"Existed = true");
+            PendingIntent send = PendingIntent.getBroadcast(this,did,alarmIntent,PendingIntent.FLAG_CANCEL_CURRENT);
             AlarmManager al = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             al.cancel(send);
         };
         if(active.isChecked()){
-            PendingIntent sender = PendingIntent.getBroadcast(TimePickerActivity.this, Integer.valueOf(DID), intent,PendingIntent.FLAG_UPDATE_CURRENT);
+            // if flag acvtive is checked, making new alarm by did
+            Log.i(TAG,"Active = true");
+            PendingIntent sender = PendingIntent.getBroadcast(TimePickerActivity.this, did, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarm = (AlarmManager)getSystemService(ALARM_SERVICE);
-            alarm.setRepeating(AlarmManager.RTC_WAKEUP, sdl, AlarmManager.INTERVAL_DAY, sender);
+            alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, sender);
             Toast.makeText(getBaseContext(), String.format(getResources().getString(R.string.alarm_preference_is_saved), DNAME), Toast.LENGTH_LONG).show();
         } else {
-            PendingIntent send = PendingIntent.getBroadcast(this,Integer.valueOf(DID),intent,PendingIntent.FLAG_CANCEL_CURRENT);
+            // if active is unchecked - just cancel previous alarm
+            Log.i(TAG,"Active = false");
+            PendingIntent send = PendingIntent.getBroadcast(this,did,alarmIntent,PendingIntent.FLAG_CANCEL_CURRENT);
             AlarmManager al = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             al.cancel(send);
             Toast.makeText(getBaseContext(), String.format(getResources().getString(R.string.alarm_is_inactive), DNAME), Toast.LENGTH_LONG).show();
         };
+        // By the open MainActivity
         Intent intentz = new Intent(TimePickerActivity.this,MainActivity.class);
         startActivity(intentz);
 

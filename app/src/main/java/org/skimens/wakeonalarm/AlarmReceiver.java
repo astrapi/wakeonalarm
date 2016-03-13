@@ -14,17 +14,23 @@ import android.util.Log;
 
 import java.util.Calendar;
 
+/*
+Class receive event from Android alarm service
+ */
+
 public class AlarmReceiver extends BroadcastReceiver{
 
-    Context context;
-    Intent intent;
+    private final String TAG = "AlarmReceiver";
+
+    private Context context;
+    private Intent intent;
 
     String DID;
     String IP;
     String MAC;
     String name;
 
-    boolean active;
+    boolean active=false;
     boolean repeat;
     boolean current_day;
 
@@ -35,12 +41,15 @@ public class AlarmReceiver extends BroadcastReceiver{
         intent = i;
 
         DID = intent.getExtras().getString("DID");
-        Log.v("OnR",DID);
+        Log.i(TAG,DID);
 
         DBHelper db = new DBHelper(context);
         SQLiteDatabase sdb = db.getReadableDatabase();
 
-        String query = "SELECT " + DBHelper.DEVICE_NAME + " , " + DBHelper.DEVICE_IP + " , " + DBHelper.DEVICE_MAC + " FROM " + DBHelper.TABLE_DEVICE + " WHERE " + DBHelper._ID +"='" + DID +"'" ;
+        String query = "SELECT " + DBHelper.DEVICE_NAME + " , " + DBHelper.DEVICE_IP +
+                " , " + DBHelper.DEVICE_MAC + " FROM " + DBHelper.TABLE_DEVICE +
+                " WHERE " + DBHelper._ID +"='" + DID +"'" ;
+
         Cursor cursor = sdb.rawQuery(query, null);
         while (cursor.moveToNext()) {
             name = cursor.getString(cursor
@@ -49,15 +58,14 @@ public class AlarmReceiver extends BroadcastReceiver{
                     .getColumnIndex(DBHelper.DEVICE_IP));
             MAC = cursor.getString(cursor
                     .getColumnIndex(DBHelper.DEVICE_MAC));
-            Log.v("CURSOR", "SELECTED " + IP + " " + MAC);
+            Log.v(TAG, "Selected: " + IP + " " + MAC);
         cursor.close();
 
-
+        //Managing week starts from monday
         int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 2;
         if (dayOfWeek == -1) {dayOfWeek = 6;};
 
         query = "SELECT * FROM " + DBHelper.TABLE_ALARM + " WHERE " + DBHelper.ALARM_DEVICE_ID + "='" + DID +"'" ;
-        Log.v("QUERY",query);
         cursor = sdb.rawQuery(query, null);
         while (cursor.moveToNext()) {
             current_day = cursor.getString(cursor
@@ -66,17 +74,19 @@ public class AlarmReceiver extends BroadcastReceiver{
                     .getColumnIndex(DBHelper.ALARM_ACTIVE)) > 0;
             repeat = cursor.getInt(cursor
                     .getColumnIndex(DBHelper.ALARM_REPEAT)) > 0;
-            Log.v("CURSOR", "FOR DID " + DID  + " SELECTED " + current_day + " active " + active + " repeat " + repeat);
+            Log.v(TAG, "for Device ID " + DID  + " selected: days=" + current_day + " active=" + active + " repeat=" + repeat);
         }
+            sdb.close();
 
-            Log.v("cur", String.valueOf(current_day));
         if(active && current_day) {
-            Log.v("act",String.valueOf(active));
+            Log.i(TAG,"Sent Wake on Lan packet");
                 new WakeOnLan(IP,MAC).execute();
                 sendNotification();
             }
 
+            // Will delete any existing alarms if active was set to false or device was deleted from database
             if(!active){
+                Log.i(TAG,"Alarm broadcast for device id" + DID + " was removed");
                 PendingIntent sender = PendingIntent.getBroadcast(context,Integer.valueOf(DID),intent,PendingIntent.FLAG_CANCEL_CURRENT);
                 AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                 alarm.cancel(sender);
@@ -84,7 +94,9 @@ public class AlarmReceiver extends BroadcastReceiver{
         }
 
     }
-
+    /*
+    Send notification if packet was sent to device
+     */
     public void sendNotification(){
                 PendingIntent contentIntent = PendingIntent.getActivity(context,
                         0, intent,

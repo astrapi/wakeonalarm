@@ -1,23 +1,19 @@
 package org.skimens.wakeonalarm;
 
-import java.io.*;
-import java.net.*;
-
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.widget.TableRow;
-import android.widget.TextView;
 
-import com.google.android.gms.analytics.Tracker;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 public class WakeOnLan extends AsyncTask<Void,String,Void> {
 
-    public final int PORT = 9;
+
+    private final int PORT = 9;
+    private final String TAG = "WOL";
     private String IP;
     private String MAC;
-
 
     public WakeOnLan(String IP, String MAC){
         this.IP = IP;
@@ -57,10 +53,10 @@ public class WakeOnLan extends AsyncTask<Void,String,Void> {
             socket.send(packet);
             socket.close();
 
-            Log.v("WOL","Wake-on-LAN packet sent.");
+            Log.i(TAG,"Wake on LAN packet sent");
         }
         catch (Exception e) {
-            Log.e("WOL", "Failed to send Wake-on-LAN packet: " + e.toString());
+            Log.e(TAG, "Failed to send Wake on LAN packet: " + e.toString());
         }
 
     }
@@ -69,7 +65,8 @@ public class WakeOnLan extends AsyncTask<Void,String,Void> {
         byte[] bytes = new byte[6];
         String[] hex = macStr.split("(\\:|\\-)");
         if (hex.length != 6) {
-            Log.e("WOL","Invalid MAC address.");
+            Log.e(TAG,"Invalid MAC address");
+            throw new IllegalArgumentException("Invalid MAC address");
         }
         try {
             for (int i = 0; i < 6; i++) {
@@ -77,7 +74,8 @@ public class WakeOnLan extends AsyncTask<Void,String,Void> {
             }
         }
         catch (NumberFormatException e) {
-            Log.e("WOL","Invalid hex digit in MAC address.");
+            Log.e(TAG,"Invalid hex digit in MAC address");
+            throw new IllegalArgumentException("Invalid hex digit in MAC address");
         }
         return bytes;
     }

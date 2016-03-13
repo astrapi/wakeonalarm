@@ -15,16 +15,13 @@ import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.google.android.gms.analytics.Tracker;
-
-import java.util.regex.Pattern;
-
-
 public class MainActivity extends AppCompatActivity {
 
-    LinearLayout deviceList;
+    private final String TAG = "Main";
 
-    Resources RS;
+    private LinearLayout deviceList;
+    private Resources RS;
+    private final DBHelper db = new DBHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         deviceList = (LinearLayout) findViewById(R.id.devicelist);
+        deviceList.setDividerPadding(1);
         RS = getResources();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -45,17 +43,22 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /*
+    OnResume executes each time when activity become on top
+     */
     @Override
     protected void onResume() {
         super.onResume();
-        updateList();}
+        updateDeviceList();}
 
     public void addPC(View view) {
-        Intent addPC = new Intent(MainActivity.this,AddPC.class);
+        Intent addPC = new Intent(MainActivity.this,AddDeviceActivity.class);
         startActivity(addPC);
-          }
+    }
 
-
+    /*
+    Call for dialog frame with option to edit or delete device
+     */
     public void onDeviceClick(Integer id,final String name,final String IP,final String MAC){
         final String DID = String.valueOf(id);
         AlertDialog.Builder ad = new AlertDialog.Builder(this);
@@ -66,33 +69,27 @@ public class MainActivity extends AppCompatActivity {
                 editDialog(DID, name, IP, MAC);
             }
         });
+        // deletes device from device and alarm table
+        // system alarm which exist in android broadcast will be handle in AlarmReceiver class
         ad.setNegativeButton(RS.getString(R.string.delete), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
-                DBHelper mDatabaseHelper = new DBHelper(MainActivity.this);
-                SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
-                db.delete(DBHelper.TABLE_ALARM, DBHelper.ALARM_DEVICE_ID + "=" + DID, null);
-                db.delete(DBHelper.TABLE_DEVICE, DBHelper._ID + "=" + DID, null);
-                db.close();
-                updateList();
+                SQLiteDatabase sdb = db.getWritableDatabase();
+                sdb.delete(DBHelper.TABLE_ALARM, DBHelper.ALARM_DEVICE_ID + "=" + DID, null);
+                sdb.delete(DBHelper.TABLE_DEVICE, DBHelper._ID + "=" + DID, null);
+                sdb.close();
+                updateDeviceList();
                 Toast.makeText(MainActivity.this, RS.getString(R.string.device_was_deleted),
                         Toast.LENGTH_LONG).show();
             }
         });
         ad.setCancelable(true);
-        ad.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            public void onCancel(DialogInterface dialog) {
-            }
-        });
         ad.create();
-        ad.show();
-
-    }
+        ad.show();}
 
 
         public void editDialog(final String DID, String name, String IP, String MAC) {
-            // Shows dialog for adding device information
+            // Shows dialog for editing device information
             // Validates parameters before call to db insert
-            Log.v("editDialog",name + " " + IP + " " + MAC);
             final setDeviceDialog dial = new setDeviceDialog(this,name, IP, MAC);
             AlertDialog.Builder ad = dial.getDialog();
             ad.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -101,25 +98,23 @@ public class MainActivity extends AppCompatActivity {
                         dial.process(DID);
                         Toast.makeText(MainActivity.this, RS.getString(R.string.device_was_updated),
                                 Toast.LENGTH_LONG).show();
-                        updateList();
+                        updateDeviceList();
                     } else {
                         editDialog(DID, dial.getName(), dial.getIP(), dial.getMAC());
                     }
-                    ;
                 }
             });
             ad.create();
-            ad.show();
-            }
+            ad.show();}
 
-
-        public void updateList(){
+        /*
+        Updates information in deviceList layout
+         */
+        public void updateDeviceList(){
 
             deviceList.removeAllViews();
-            deviceList.setDividerPadding(1);
-            DBHelper db = new DBHelper(this);
-            SQLiteDatabase sdb = db.getReadableDatabase();
 
+            SQLiteDatabase sdb = db.getReadableDatabase();
             String query = "SELECT * FROM " + DBHelper.TABLE_DEVICE;
             Cursor cursor = sdb.rawQuery(query, null);
             while (cursor.moveToNext()) {
@@ -131,12 +126,12 @@ public class MainActivity extends AppCompatActivity {
                         .getColumnIndex(DBHelper.DEVICE_IP));
                 final String MAC = cursor.getString(cursor
                         .getColumnIndex(DBHelper.DEVICE_MAC));
-                Log.v("CURSOR", "ROW " + id + " HAS NAME " + name + " " + IP + " " + MAC);
+                Log.i(TAG, "Devices list item: id=" + id + " name=" + name + " ip=" + IP + " mac=" + MAC);
                 deviceLayout dl = new deviceLayout(MainActivity.this,name,IP,MAC);
                 LinearLayout mainLayout = dl.getLayout(id);
                 deviceList.addView(mainLayout, deviceList.getChildCount() - 1);
             }
-            cursor.close();
+            sdb.close();
 
     }
 

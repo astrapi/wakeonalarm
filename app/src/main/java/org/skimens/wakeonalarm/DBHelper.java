@@ -6,6 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
+/*
+Class for managing app's database
+ */
 public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
 
     private static final String DATABASE_NAME = "wakeonalarm.db";

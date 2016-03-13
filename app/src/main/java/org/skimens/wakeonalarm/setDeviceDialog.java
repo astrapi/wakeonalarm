@@ -17,32 +17,48 @@ import android.widget.Toast;
 
 import java.util.regex.Pattern;
 
+/*
+Class for mamanging device dialog layout
+Used in MainActivity and AddDeviceActivity activity
+ */
+
 public class setDeviceDialog {
 
-    public static Context context;
 
-    public static AlertDialog.Builder builder;
+    private final String TAG = "SetDeviceDialog";
+    private Context context;
 
-    public static EditText nameedit;
-    public static EditText ipedit;
-    public static EditText macedit;
-    Resources RS;
+    public AlertDialog.Builder builder;
 
+    public EditText nameedit;
+    public EditText ipedit;
+    public EditText macedit;
+
+    private String name;
+    private String IP;
+    private String MAC;
+
+
+
+    private Resources RS;
+
+    /*
+    Setting common components
+     */
     public setDeviceDialog(Context c,String name,String IP,String MAC){
         RS = c.getResources();
 
-        Log.v("Call","init");
         context = c;
         builder = new AlertDialog.Builder(context);
 
-        builder.setTitle(RS.getString(R.string.custom_name_for_device));
+        builder.setTitle(RS.getString(R.string.add_device));
 
         LinearLayout layout = new LinearLayout(context);
         layout.setGravity(Gravity.CENTER_HORIZONTAL);
         layout.setOrientation(LinearLayout.VERTICAL);
 
         TextView nametext = new TextView(context);
-        nametext.setText(RS.getString(R.string.add_device));
+        nametext.setText(RS.getString(R.string.custom_name_for_device));
         layout.addView(nametext);
 
         nameedit = new EditText(context);
@@ -95,53 +111,46 @@ public class setDeviceDialog {
         return macedit.getText().toString();
     }
 
-
-
+    /*
+    Check submitted values if exist and valid
+     */
     public boolean checkSetDialog(){
         // Check if IP address was submitted and it's valid
-        String name = nameedit.getText().toString().trim();
-        String IP = ipedit.getText().toString().trim();
-        String MAC = macedit.getText().toString().trim();
+        this.name = nameedit.getText().toString().trim();
+        this.IP = ipedit.getText().toString().trim();
+        this.MAC = macedit.getText().toString().trim();
 
         if (IP.length() == 0) {
-            Log.v("IP", " is null");
             Toast.makeText(context,RS.getString(R.string.submit_ip), Toast.LENGTH_LONG).show();
             return false;
         } else {
             final Pattern IPPATTERN = Pattern.compile(
                     "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
             if (!IPPATTERN.matcher(IP).matches()) {
-                Log.v("IP", " is null");
                 Toast.makeText(context, RS.getString(R.string.ip_not_valid), Toast.LENGTH_LONG).show();
                 return false;
             }
         }
         if (MAC.length() == 0) {
-            Log.v("MAC", " is null");
             Toast.makeText(context, RS.getString(R.string.submit_mac), Toast.LENGTH_LONG).show();
             return false;
         } else {
             final Pattern MACPATTERN = Pattern.compile(
                     "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$");
             if (!MACPATTERN.matcher(MAC).matches()) {
-                Log.v("MAC", " is null");
                 Toast.makeText(context, RS.getString(R.string.mac_not_valid), Toast.LENGTH_LONG).show();
                 return false;
             }
         }
-
-        Log.v("name", "name is " + name);
         if (name.length() == 0) {
-            Log.v("name", " is null");
             Toast.makeText(context, RS.getString(R.string.submit_name), Toast.LENGTH_LONG).show();
             return false;
         }
-
-        Log.v("IP", "end " + IP);
         return true;
-
     }
-
+    /*
+    Method for AddDeviceActivity activity
+     */
     public void process(){
         // Store device parameters to database
         // All checks are done before method call
@@ -149,32 +158,22 @@ public class setDeviceDialog {
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        String name = nameedit.getText().toString().trim();
-        String IP = ipedit.getText().toString().trim();
-        String MAC = macedit.getText().toString().trim();
-
-        Log.v("Insert",name + " " + IP + " " + MAC);
-
         values.put(DBHelper.DEVICE_NAME, name);
         values.put(DBHelper.DEVICE_IP, IP);
         values.put(DBHelper.DEVICE_MAC, MAC);
         db.insert(DBHelper.TABLE_DEVICE, null, values);
         db.close();
+
         Toast.makeText(context, RS.getString(R.string.added_to_list), Toast.LENGTH_LONG).show();
 
     }
-
+    /*
+    Method for MainActivity (Updating)
+     */
     public void process(String DID){
         DBHelper mDatabaseHelper = new DBHelper(context);
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-
-        // Check if IP address was submitted and it's valid
-        String name = nameedit.getText().toString().trim();
-        String IP = ipedit.getText().toString().trim();
-        String MAC = macedit.getText().toString().trim();
-
-        Log.v("Insert","ID " + DID + " params: "+ name + " " + IP + " " + MAC);
 
         values.put(DBHelper.DEVICE_NAME, name);
         values.put(DBHelper.DEVICE_IP, IP);
