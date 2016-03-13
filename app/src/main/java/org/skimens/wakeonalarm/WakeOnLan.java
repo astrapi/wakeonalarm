@@ -3,17 +3,21 @@ package org.skimens.wakeonalarm;
 import java.io.*;
 import java.net.*;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.android.gms.analytics.Tracker;
+
 public class WakeOnLan extends AsyncTask<Void,String,Void> {
 
     public final int PORT = 9;
     private String IP;
     private String MAC;
+
 
     public WakeOnLan(String IP, String MAC){
         this.IP = IP;

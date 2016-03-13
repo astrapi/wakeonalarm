@@ -5,26 +5,17 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.analytics.Tracker;
 
 import java.util.regex.Pattern;
 
@@ -144,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
                 deviceLayout dl = new deviceLayout(MainActivity.this,name,IP,MAC);
                 LinearLayout mainLayout = dl.getLayout(id);
                 deviceList.addView(mainLayout, deviceList.getChildCount() - 1);
-                Log.v("lol",String.valueOf(deviceList.getChildCount()));
             }
             cursor.close();
 

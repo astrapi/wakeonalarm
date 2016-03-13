@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_device">追加</string>
+    <string name="delete">削除</string>
+    <string name="added_to_list">%1$sがデバイスのリストに付足しました</string>
+    <string name="edit">編集</string>
+    <string name="device_was_deleted">デバイスが削除しました</string>
+    <string name="ip_address">IPアドレス</string>
+    <string name="ip_not_valid">IPアドレスは妥当ではありませｎ</string>
+    <string name="mac_address">MACアドレス</string>
+    <string name="mac_not_valid">MACアドレスは妥当ではありませｎ</string>
+    <string name="custom_name_for_device">\nランダムの装置名</string>
+    <string name="submit_ip">IPアドレスを教えて下さい</string>
+    <string name="submit_mac">MACアドレスを教えて下さい</string>
+    <string name="submit_name">パソコンのランダムの名を教えて下さい</string>
+    <string name="cancel">閉じる</string>
+    <string name="select_action">選んで下さい</string>
+    <string name="device_was_updated">デバイス更新がしました</string>
+    <string name="fr">金</string>
+    <string name="mo">月</string>
+    <string name="sa">土</string>
+    <string name="su">日</string>
+    <string name="th">木</string>
+    <string name="tu">火</string>
+    <string name="we">水</string>
+    <string name="alarm_is_inactive">%1$sのアラームの時計が非アクティブ化しました</string>
+    <string name="alarm_preference_is_saved">%1$sのアラームの時計がセーブしました</string>
+    <string name="active">有効</string>
+    <string name="wake_packet_sent_to">WakeOnLANのパケットが%1$s(%2$s)に送りします</string>
+    <string name="wifi_not_found">WIFIのIPアドレスがもらえませんでした</string>
+</resources>

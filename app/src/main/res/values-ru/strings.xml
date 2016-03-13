@@ -18,7 +18,6 @@
     <string name="mac_address">МАС адрес:</string>
     <string name="mac_not_valid">MAC адрес не верен</string>
     <string name="mo">ПН</string>
-    <string name="repeat">Повтор</string>
     <string name="sa">СБ</string>
     <string name="su">ВС</string>
     <string name="submit_ip">Пожалуйста, укажите IP адрес</string>

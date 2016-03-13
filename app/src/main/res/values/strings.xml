@@ -11,7 +11,7 @@
     <string name="alarm_is_inactive">"Alarm for %1$s is inactivate"</string>
     <string name="cancel">Cancel</string>
     <string name="active">Active</string>
-    <string name="repeat">Repeat</string>
+    <string name="repeat" translatable="false">Repeat</string>
     <string name="mo">MO</string>
     <string name="tu">TU</string>
     <string name="we">WE</string>
