@@ -50,7 +50,7 @@ public class WakeOnLan extends AsyncTask<Void,String,Void> {
             InetAddress address = InetAddress.getByName(ipStr);
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length, address, PORT);
             DatagramSocket socket = new DatagramSocket();
-            socket.send(packet);
+            for(int i = 0; i < 5; i ++){ socket.send(packet); }
             socket.close();
 
             Log.i(TAG,"Wake on LAN packet sent");

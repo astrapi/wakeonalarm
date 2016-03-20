@@ -18,7 +18,7 @@ import android.widget.Toast;
 import java.util.regex.Pattern;
 
 /*
-Class for mamanging device dialog layout
+Class for managing device dialog layout
 Used in MainActivity and AddDeviceActivity activity
  */
 
@@ -164,7 +164,7 @@ public class setDeviceDialog {
         db.insert(DBHelper.TABLE_DEVICE, null, values);
         db.close();
 
-        Toast.makeText(context, RS.getString(R.string.added_to_list), Toast.LENGTH_LONG).show();
+        Toast.makeText(context, String.format(RS.getString(R.string.added_to_list),name), Toast.LENGTH_LONG).show();
 
     }
     /*

@@ -23,7 +23,9 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_addpc" />
+     <include layout="@layout/content_addpc" />
+
+
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabaddpc"
